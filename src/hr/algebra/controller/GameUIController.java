@@ -41,8 +41,7 @@ public class GameUIController implements Initializable {
     
     @FXML
     private void btnSinglePlayerClick()
-    {
-     
+    {    
         Stage stage = (Stage) mainPane.getScene().getWindow();
         try {
             start(stage,SINGLEPLAYER_PATH);

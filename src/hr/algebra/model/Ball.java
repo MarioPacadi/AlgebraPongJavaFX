@@ -14,16 +14,18 @@ import javafx.scene.shape.Circle;
  */
 public class Ball extends Circle {
 
-    public int hit=0;
-    public final double BALL_ACCELERATION=0.8;
-    
-    public final double radius = 20;
-    public double x, y;
-    public int dx = 1, dy = 1;   
+    private final double BALL_ACCELERATION=0.8;   
+  
+    private int hit = 0;
+    private int dx = 1, dy = 1;
 
     public Ball(){}
 
     public void moveBall(Pane PlayingField) {
+        double x=this.getCenterX();
+        double y=this.getCenterY();
+        double radius=this.getRadius();
+        
         if (x < radius || x > PlayingField.getWidth() - radius) {
             setHit(dx);
             dx *= -1;
@@ -32,7 +34,7 @@ public class Ball extends Circle {
             dy *= -1;
             //TimelineExtensions.increaseSpeed(timeline,BALL_ACCELERATION);
         }
-
+        
         x += dx;
         y += dy;
 
@@ -44,9 +46,31 @@ public class Ball extends Circle {
     public int getHit() {
         return hit;
     }
+    
+    public double getBALL_ACCELERATION() {
+        return BALL_ACCELERATION;
+    }
 
+    public int getDx() {
+        return dx;
+    }
+
+    public int getDy() {
+        return dy;
+    }
+    
     public void setHit(int hit) {
         this.hit = hit;
     }
+
+    public void setDx(int dx) {
+        this.dx = dx;
+    }
+
+    public void setDy(int dy) {
+        this.dy = dy;
+    }
+    
+    
     
 }

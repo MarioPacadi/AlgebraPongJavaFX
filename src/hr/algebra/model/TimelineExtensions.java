@@ -12,7 +12,7 @@ import javafx.beans.property.DoubleProperty;
  *
  * @author Mario
  */
-public class TimelineExtensions{
+public final class TimelineExtensions{
     
     public static void increaseSpeed(Timeline timeline,double ACCELERATION) {
         timeline.setRate(timeline.getRate() + ACCELERATION);

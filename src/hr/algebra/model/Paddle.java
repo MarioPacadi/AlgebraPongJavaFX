@@ -11,51 +11,42 @@ import javafx.scene.shape.Rectangle;
 public class Paddle extends Rectangle {
     public double vy;
 
-    public static double speed = 20;
-    public static double stopSpeed = .001;
-    public static double accel = 5;
-    public static double width = 20;
-    public static double height = 100;
+    private static final double SPEED = 20;
+    private static final double STOP_SPEED = .001;
+    private static final double ACCELERATION = 5;
 
-    public Paddle(){}
-    
-    public Paddle(double startX, double startY){
-        this.setX(startX);
-        this.setY(startY);
-        this.setWidth(width);
-        this.setHeight(height);
-    }
+    public Paddle(){}   
 
     public void updatePosition(){
         this.setY(this.getY() + vy);
     }
 
     public void moveUpward(){
-        if (vy > -speed) {
-            vy = vy - accel;
+        if (vy > -SPEED) {
+            vy = vy - ACCELERATION;
         }
-        if (vy < -speed) {
-            vy = -speed;
+        else if (vy < -SPEED) {
+            vy = -SPEED;
         }
     }
 
     public void moveDownward(){
-        if (vy < speed) {
-            vy  = vy + accel;
+        if (vy < SPEED) {
+            vy  = vy + ACCELERATION;
         }
-        if (vy > speed) {
-            vy = speed;
+        else if (vy > SPEED) {
+            vy = SPEED;
         }
     }
 
     public void slowDown(){
         if (vy > 0) {
-            vy -= accel;
+            vy -= ACCELERATION;
         } else if (vy < 0) {
-            vy += accel;
+            vy += ACCELERATION;
         }
 
-        if (Math.abs(vy) < stopSpeed) {
+        if (Math.abs(vy) < STOP_SPEED) {
             vy = 0;
         }
     }

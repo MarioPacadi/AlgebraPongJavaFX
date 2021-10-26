@@ -46,14 +46,9 @@ public class SingleplayerController implements Initializable {
     @FXML
     private Label lbLeft,lbRight;
     
-    public Timeline timeline;
+    private Timeline timeline;
     
     private final String BOING="Boing";
-    double padOffset = 5;
-//    int scorePlayerL = 0;
-//    int scorePlayerR = 0;
-//    double scoreFontSize = 36;
-//    Text lScoreText, rScoreText;
     
     @FXML
     public void escapeKeyPressed(KeyEvent event) {
@@ -72,10 +67,7 @@ public class SingleplayerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        SetUpBall();             
-        
-        PlayingField.setOnMousePressed(e -> timeline.pause());
-        PlayingField.setOnMouseReleased(e -> timeline.play());
+        SetUpBall();         
         
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
@@ -108,8 +100,8 @@ public class SingleplayerController implements Initializable {
     
     private void checkPaddle(Paddle pad){        
         if (PaddelContact(pad)) {
-            ball.dx *= -1;
-            TimelineExtensions.increaseSpeed(timeline,ball.BALL_ACCELERATION);
+            ball.setDx(ball.getDx()*-1);
+            TimelineExtensions.increaseSpeed(timeline,ball.getBALL_ACCELERATION());
             //System.out.println(BOING);
         }
 
@@ -142,20 +134,20 @@ public class SingleplayerController implements Initializable {
         pad.vy = pad.vy * -bounceStrength;
     }
 
-    private void checkInput(){
+    private void checkInput() {
         // left paddle
-        if(MovementHandler.isDownPressedL() && !MovementHandler.isUpPressedL()){
+        if (MovementHandler.isDownPressedL() && !MovementHandler.isUpPressedL()) {
             padL.moveDownward();
-        }else if(MovementHandler.isUpPressedL() && !MovementHandler.isDownPressedL()){
+        } else if (MovementHandler.isUpPressedL() && !MovementHandler.isDownPressedL()) {
             padL.moveUpward();
         } else {
             padL.slowDown();
         }
 
         // right paddle
-        if(MovementHandler.isDownPressedR() && !MovementHandler.isUpPressedR()){
+        if (MovementHandler.isDownPressedR() && !MovementHandler.isUpPressedR()) {
             padR.moveDownward();
-        }else if(MovementHandler.isUpPressedR() && !MovementHandler.isDownPressedR()){
+        } else if (MovementHandler.isUpPressedR() && !MovementHandler.isDownPressedR()) {
             padR.moveUpward();
         } else {
             padR.slowDown();
@@ -171,7 +163,7 @@ public class SingleplayerController implements Initializable {
     
     private void SetGameplaySpeed(int i) {
         for (int j = 0; j < i; j++) {
-            TimelineExtensions.increaseSpeed(timeline,ball.BALL_ACCELERATION);
+            TimelineExtensions.increaseSpeed(timeline,ball.getBALL_ACCELERATION());
         }
     }
 
@@ -191,18 +183,16 @@ public class SingleplayerController implements Initializable {
     private void SetUpBall() {
         start_posX=ball.getCenterX();
         start_posY=ball.getCenterY();
-        ball.x=ball.getCenterX();
-        ball.y=ball.getCenterY();
-        ball.dx=GenRandom();
-        ball.dy=GenRandom(); 
+        ball.setDx(GenRandom());
+        ball.setDy(GenRandom());
     }
     
     private void ChangeScore() {
         int isHit = ball.getHit();
         if (isHit != 0 && !(isHit > 1) && !(isHit < -1)) {
             //return to start
-            ball.x = start_posX;
-            ball.y = start_posY;
+            ball.setCenterX(start_posX);
+            ball.setCenterY(start_posY);
 
             if (isHit > 0) {SetScore(lbLeft);} 
             else {SetScore(lbRight);}
