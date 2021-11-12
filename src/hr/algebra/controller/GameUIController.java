@@ -57,6 +57,7 @@ public class GameUIController implements Initializable {
         scene.setOnKeyPressed(MovementHandler.getMove());
         scene.setOnKeyReleased(MovementHandler.getStand());        
         window.setScene(scene);
+        //window.setResizable(true);
         window.show();
     }
     

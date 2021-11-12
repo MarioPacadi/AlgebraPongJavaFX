@@ -56,7 +56,7 @@ public class SingleplayerController implements Initializable {
         if (event.getCode() == KeyCode.ESCAPE) {
             lbPause.setVisible(!lbPause.visibleProperty().get());
             PlayingField.setOpacity(0.5);
-            timeline.pause();
+            timeline.stop();
             System.out.println("escape got called");
         } else {
             PlayingField.setOpacity(1);
