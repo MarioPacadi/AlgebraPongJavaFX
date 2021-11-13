@@ -11,6 +11,7 @@ import hr.algebra.model.TimelineExtensions;
 import hr.algebra.handler.MovementHandler;
 import hr.algebra.utilities.AlertUtils;
 import hr.algebra.utilities.SerializationUtils;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -38,7 +39,7 @@ public class SingleplayerController implements Initializable {
 
     // <editor-fold defaultstate="collapsed" desc="Variables">
 
-    private static final String FILE_NAME = "save_file.ser";
+    private static final String BALL_FILE_NAME = "ball_save_file.ser";
     
     private final int GAME_SPEED=5;
     private static double start_posX;
@@ -67,6 +68,9 @@ public class SingleplayerController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        start_posX = ball.getCenterX();
+        start_posY = ball.getCenterY();
         
         DetectSaveDataFile();
       
@@ -225,7 +229,8 @@ public class SingleplayerController implements Initializable {
 
     //<editor-fold defaultstate="collapsed" desc="Serialization">
     private void DetectSaveDataFile() {
-        if (AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
+        
+        if (new File(BALL_FILE_NAME).exists() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
             LoadBallFile();
         } else {
             SetupDefaultBall();
@@ -233,22 +238,17 @@ public class SingleplayerController implements Initializable {
     }
     
     private void SetupDefaultBall() {
-        start_posX = ball.getCenterX();
-        start_posY = ball.getCenterY();
         ball.setDx(GenRandom());
         ball.setDy(GenRandom());
     }
     
     private void LoadBallFile() {
         try {
-            SetupDefaultBall();
-            Ball ser_ball = (Ball) SerializationUtils.read(FILE_NAME);  
+            Ball ser_ball = (Ball) SerializationUtils.read(BALL_FILE_NAME);  
             ball.setCenterX(ser_ball.getCenterX());
-            ball.setCenterY(ser_ball.getCenterY());  
-                  
-            System.out.println("{Ser_ball "+ser_ball.toString()+" }");
-            System.out.println("{Ball "+ball.toString()+" }");
-
+            ball.setCenterY(ser_ball.getCenterY());
+            ball.setDx(ser_ball.getDx());
+            ball.setDy(ser_ball.getDy());
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -258,9 +258,8 @@ public class SingleplayerController implements Initializable {
         try {
             timeline.stop();
             if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
-                SerializationUtils.write(ball, FILE_NAME);
-                System.out.println("{Ball "+ball.toString()+ball.getId()+ "}"); 
-            }        
+                SerializationUtils.write(ball, BALL_FILE_NAME);
+            }
         } catch (IOException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -278,7 +277,6 @@ public class SingleplayerController implements Initializable {
                         // stage is set. now is the right time to do whatever we need to the stage in the controller.
                         Stage stage = (Stage) newWindow;
                         stage.setOnCloseRequest(e -> {
-                            System.out.println("Exited");
                             SaveBallFile();
                             Platform.exit();
                         });
