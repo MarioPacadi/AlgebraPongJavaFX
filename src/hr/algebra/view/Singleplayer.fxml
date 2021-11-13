@@ -10,7 +10,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.291" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.controller.SingleplayerController">
+<AnchorPane id="AnchorPane" fx:id="mainPane" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.291" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.controller.SingleplayerController">
    <children>
       <Pane fx:id="PlayingField" onKeyPressed="#escapeKeyPressed" prefHeight="574.0" style="-fx-background-color: BLACK;" prefWidth="800.0">
          <children>

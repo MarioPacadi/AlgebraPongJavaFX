@@ -9,17 +9,25 @@ import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.TimelineExtensions;
 import hr.algebra.handler.MovementHandler;
+import hr.algebra.utilities.AlertUtils;
+import hr.algebra.utilities.SerializationUtils;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -29,10 +37,14 @@ import javafx.util.Duration;
  */
 public class SingleplayerController implements Initializable {
 
+    private static final String FILE_NAME = "save_file.ser";
+    
     private final int GAME_SPEED=5;
     private static double start_posX;
     private static double start_posY;
-     
+    
+    @FXML
+    private AnchorPane mainPane;
     @FXML
     private Pane PlayingField;
     @FXML
@@ -66,8 +78,10 @@ public class SingleplayerController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
-        SetUpBall();         
+        if (AlertUtils.infoBox("Would you like to load data?", "Save file detected", "Info")) {
+            LoadBallFile();
+        }
+        else {SetupDefaultBall();}   
         
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
@@ -85,6 +99,7 @@ public class SingleplayerController implements Initializable {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
         SetGameplaySpeed(GAME_SPEED);
+        SetOnExitEvent();
     }
     
      private void checkGameBounds(){
@@ -180,7 +195,7 @@ public class SingleplayerController implements Initializable {
         
     }
 
-    private void SetUpBall() {
+    private void SetupDefaultBall() {
         start_posX=ball.getCenterX();
         start_posY=ball.getCenterY();
         ball.setDx(GenRandom());
@@ -221,5 +236,66 @@ public class SingleplayerController implements Initializable {
         
         System.out.println(sb.toString());
     }
+
+    private void LoadBallFile() {
+        try {
+            Ball ser_ball = (Ball) SerializationUtils.read(FILE_NAME);
+            //ball=ser_ball;           
+            
+            ball.setCenterX(ser_ball.getCenterX());
+            ball.setCenterY(ser_ball.getCenterY());  
+            start_posX = ser_ball.getCenterX();
+            start_posY = ser_ball.getCenterY();
+            ball.setDx(GenRandom());
+            ball.setDy(GenRandom());
+            //SetupDefaultBall();
+                       
+            System.out.println("{Ser_ball "+ser_ball.toString()+" }");
+            System.out.println("{Ball "+ball.toString()+" }");
+
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void SaveBallFile(Ball ball){
+        try {
+            timeline.stop();
+            if (AlertUtils.infoBox("Would you like to save your game?", "Save game data", "Info")) {
+                SerializationUtils.write(ball, FILE_NAME);
+                System.out.println("{Ball "+ball.toString()+" }"); 
+                //CentarX i CentarY se ne spremaju, sloziti da budu @data
+            }        
+        } catch (IOException ex) {
+            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void SetOnExitEvent() {
+        
+        PlayingField.sceneProperty().addListener((observableScene, oldScene, newScene) -> {
+            if (oldScene == null && newScene != null) {
+                // scene is set for the first time. Now its the time to listen stage changes.
+                newScene.windowProperty().addListener((observableWindow, oldWindow, newWindow) -> {
+                    if (oldWindow == null && newWindow != null) {
+                        // stage is set. now is the right time to do whatever we need to the stage in the controller.
+                        ((Stage) newWindow).setOnCloseRequest(e -> {
+                            System.out.println("Exited");
+                            SaveBallFile(ball);
+                            //System.exit(0);
+                            Platform.exit();
+                        });
+                    }
+                });
+            }
+        });
+//        Stage stage = (Stage) mainPane.getScene().getWindow(); 
+//        System.out.println("Exited");
+//        stage.setOnCloseRequest(e -> {
+//            
+//            SaveBallFile(ball);           
+//            Platform.exit();
+//        });
+    }  
     
 }

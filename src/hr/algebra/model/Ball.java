@@ -5,6 +5,7 @@
  */
 package hr.algebra.model;
 
+import java.io.Serializable;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
@@ -12,7 +13,7 @@ import javafx.scene.shape.Circle;
  *
  * @author Mario
  */
-public class Ball extends Circle {
+public class Ball extends Circle implements Serializable  {
 
     private final double BALL_ACCELERATION=0.8;   
   
@@ -69,6 +70,17 @@ public class Ball extends Circle {
 
     public void setDy(int dy) {
         this.dy = dy;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb=new StringBuilder();
+        sb.append("CentarX = ").append(this.getCenterX()).append("\n");
+        sb.append("CentarY = ").append(this.getCenterY()).append("\n");
+        sb.append("dx = ").append(this.dx).append("\n");
+        sb.append("dy = ").append(this.dy).append("\n");
+        
+        return sb.toString();
     }
     
     

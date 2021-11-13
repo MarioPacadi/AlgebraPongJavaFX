@@ -41,7 +41,7 @@ public class GameUIController implements Initializable {
     
     @FXML
     private void btnSinglePlayerClick()
-    {    
+    {
         Stage stage = (Stage) mainPane.getScene().getWindow();
         try {
             start(stage,SINGLEPLAYER_PATH);
@@ -58,7 +58,7 @@ public class GameUIController implements Initializable {
         scene.setOnKeyReleased(MovementHandler.getStand());        
         window.setScene(scene);
         //window.setResizable(true);
-        window.show();
+        window.show();       
     }
     
     @FXML
@@ -66,6 +66,7 @@ public class GameUIController implements Initializable {
     {
         System.exit(0);
     }
+    
 }
 
 
