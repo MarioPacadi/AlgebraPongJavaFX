@@ -37,6 +37,8 @@ import javafx.util.Duration;
  */
 public class SingleplayerController implements Initializable {
 
+    // <editor-fold defaultstate="collapsed" desc="Variables">
+
     private static final String FILE_NAME = "save_file.ser";
     
     private final int GAME_SPEED=5;
@@ -62,27 +64,13 @@ public class SingleplayerController implements Initializable {
     
     private final String BOING="Boing";
     
-    @FXML
-    public void escapeKeyPressed(KeyEvent event) {
-        //Pause game
-        if (event.getCode() == KeyCode.ESCAPE) {
-            lbPause.setVisible(!lbPause.visibleProperty().get());
-            PlayingField.setOpacity(0.5);
-            timeline.stop();
-            System.out.println("escape got called");
-        } else {
-            PlayingField.setOpacity(1);
-            timeline.play();
-        }
-    }
+    // </editor-fold>
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        if (AlertUtils.infoBox("Would you like to load data?", "Save file detected", "Info")) {
-            LoadBallFile();
-        }
-        else {SetupDefaultBall();}   
         
+        DetectSaveDataFile();
+      
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
                 checkInput();
@@ -102,6 +90,7 @@ public class SingleplayerController implements Initializable {
         SetOnExitEvent();
     }
     
+    //<editor-fold defaultstate="collapsed" desc="GameBounds">
      private void checkGameBounds(){
         //Paddles can't go beyond PlayingField bounds
         PaddleBoundary(padL);
@@ -148,7 +137,9 @@ public class SingleplayerController implements Initializable {
         }
         pad.vy = pad.vy * -bounceStrength;
     }
+     // </editor-fold> 
 
+    //<editor-fold defaultstate="collapsed" desc="Inputs and bot">
     private void checkInput() {
         // left paddle
         if (MovementHandler.isDownPressedL() && !MovementHandler.isUpPressedL()) {
@@ -194,14 +185,9 @@ public class SingleplayerController implements Initializable {
 //        }
         
     }
-
-    private void SetupDefaultBall() {
-        start_posX=ball.getCenterX();
-        start_posY=ball.getCenterY();
-        ball.setDx(GenRandom());
-        ball.setDy(GenRandom());
-    }
+    // </editor-fold>   
     
+    //<editor-fold defaultstate="collapsed" desc="Score">
     private void ChangeScore() {
         int isHit = ball.getHit();
         if (isHit != 0 && !(isHit > 1) && !(isHit < -1)) {
@@ -236,11 +222,26 @@ public class SingleplayerController implements Initializable {
         
         System.out.println(sb.toString());
     }
+    // </editor-fold> 
 
+    private void DetectSaveDataFile() {
+        if (AlertUtils.infoBox("Would you like to load data?", "Save file detected", "Info")) {
+            LoadBallFile();
+        } else {
+            SetupDefaultBall();
+        }
+    }
+    
+    private void SetupDefaultBall() {
+        start_posX = ball.getCenterX();
+        start_posY = ball.getCenterY();
+        ball.setDx(GenRandom());
+        ball.setDy(GenRandom());
+    }
+    
     private void LoadBallFile() {
         try {
-            Ball ser_ball = (Ball) SerializationUtils.read(FILE_NAME);
-            //ball=ser_ball;           
+            Ball ser_ball = (Ball) SerializationUtils.read(FILE_NAME);  
             
             ball.setCenterX(ser_ball.getCenterX());
             ball.setCenterY(ser_ball.getCenterY());  
@@ -279,23 +280,39 @@ public class SingleplayerController implements Initializable {
                 newScene.windowProperty().addListener((observableWindow, oldWindow, newWindow) -> {
                     if (oldWindow == null && newWindow != null) {
                         // stage is set. now is the right time to do whatever we need to the stage in the controller.
-                        ((Stage) newWindow).setOnCloseRequest(e -> {
+                        Stage stage = (Stage) newWindow;
+                        stage.setOnCloseRequest(e -> {
                             System.out.println("Exited");
                             SaveBallFile(ball);
-                            //System.exit(0);
                             Platform.exit();
                         });
+                        stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event)->escapeKeyPressed(event));
                     }
                 });
             }
-        });
-//        Stage stage = (Stage) mainPane.getScene().getWindow(); 
-//        System.out.println("Exited");
-//        stage.setOnCloseRequest(e -> {
-//            
-//            SaveBallFile(ball);           
-//            Platform.exit();
-//        });
-    }  
+        });               
+    }
+
+    public void escapeKeyPressed(KeyEvent keyEvent) {
+        //Pause game
+        switch (keyEvent.getCode()) {
+            case ESCAPE:
+                {
+                    boolean pauseActive = !lbPause.visibleProperty().get();
+                    if (pauseActive) {
+                        PlayingField.setOpacity(0.5);
+                        timeline.stop();
+                    } else {
+                        PlayingField.setOpacity(1);
+                        timeline.play();
+                    }
+                    lbPause.setVisible(pauseActive);
+                }
+                break;
+            default:
+            {
+            }
+        }
+    }
     
 }
