@@ -5,12 +5,18 @@
  */
 package hr.algebra.model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import javafx.scene.shape.Rectangle;
 
 //DODAJ implements Externalizable 
-public class Paddle extends Rectangle {
+public class Paddle extends Rectangle implements Serializable   {
+    
+    private static final long serialVersionUID = 2L;
+    
     public double vy;
-
     private static final double SPEED = 20;
     private static final double STOP_SPEED = .001;
     private static final double ACCELERATION = 5;
@@ -49,5 +55,17 @@ public class Paddle extends Rectangle {
         if (Math.abs(vy) < STOP_SPEED) {
             vy = 0;
         }
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        oos.writeUTF(Double.toString(this.getX()));
+        oos.writeUTF(Double.toString(this.getY()));
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        this.setX(Double.parseDouble(ois.readUTF()));
+        this.setY(Double.parseDouble(ois.readUTF()));
     }
 }

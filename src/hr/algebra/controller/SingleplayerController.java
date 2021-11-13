@@ -13,6 +13,8 @@ import hr.algebra.utilities.AlertUtils;
 import hr.algebra.utilities.SerializationUtils;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
@@ -25,7 +27,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -35,18 +36,21 @@ import javafx.util.Duration;
  *
  * @author Mario
  */
-public class SingleplayerController implements Initializable {
+public class SingleplayerController implements Initializable,Serializable {
 
     // <editor-fold defaultstate="collapsed" desc="Variables">
 
-    private static final String BALL_FILE_NAME = "ball_save_file.ser";
+    private static final long serialVersionUID = 3L;
+    
+    private static final String BALL_FILE_NAME = "ball.ser";
+    private static final String SAVE_FILE_NAME = "singleplayer.ser";
+    private static final String LEFT_RECTANGLE_FILE_NAME = "left_rectangle.ser";
+    private static final String RIGHT_RECTANGLE_FILE_NAME = "right_rectangle.ser";
     
     private final int GAME_SPEED=5;
     private static double start_posX;
     private static double start_posY;
     
-    @FXML
-    private AnchorPane mainPane;
     @FXML
     private Pane PlayingField;
     @FXML
@@ -60,9 +64,7 @@ public class SingleplayerController implements Initializable {
     @FXML
     private Label lbLeft,lbRight;
     
-    private Timeline timeline;
-    
-    private final String BOING="Boing";
+    private Timeline timeline;   
     
     // </editor-fold>
 
@@ -230,8 +232,11 @@ public class SingleplayerController implements Initializable {
     //<editor-fold defaultstate="collapsed" desc="Serialization">
     private void DetectSaveDataFile() {
         
-        if (new File(BALL_FILE_NAME).exists() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
-            LoadBallFile();
+        if (CheckFileExistance() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
+            LoadFile(ball,BALL_FILE_NAME);
+            LoadFile(padL,LEFT_RECTANGLE_FILE_NAME);
+            LoadFile(padR,RIGHT_RECTANGLE_FILE_NAME);
+            //LoadScoreAndTimeline(SAVE_FILE_NAME);
         } else {
             SetupDefaultBall();
         }
@@ -242,30 +247,57 @@ public class SingleplayerController implements Initializable {
         ball.setDy(GenRandom());
     }
     
-    private void LoadBallFile() {
+    private void SetupCustomBall(Ball customBall) {
+        ball.setCenterX(customBall.getCenterX());
+        ball.setCenterY(customBall.getCenterY());
+        ball.setDx(customBall.getDx());
+        ball.setDy(customBall.getDy());
+    }
+    
+    private void ChangePaddle(Paddle paddle,Paddle custom) {
+        paddle.setX(custom.getX());
+        paddle.setY(custom.getY());
+        paddle.vy=custom.vy;
+    }
+    
+    private void LoadFile(Object object,String file_name) {
         try {
-            Ball ser_ball = (Ball) SerializationUtils.read(BALL_FILE_NAME);  
-            ball.setCenterX(ser_ball.getCenterX());
-            ball.setCenterY(ser_ball.getCenterY());
-            ball.setDx(ser_ball.getDx());
-            ball.setDy(ser_ball.getDy());
+            Class<?> clazz = Class.forName(object.getClass().getName());
+            Object ser_obj = (Object) SerializationUtils.read(file_name);         
+       
+            //Ball.class.getSimpleName()
+            
+            switch (ser_obj.getClass().getSimpleName()) {
+                case "Ball": SetupCustomBall((Ball)ser_obj); break;
+                case "Paddle": ChangePaddle((Paddle) object, (Paddle)ser_obj); break;
+                default: throw new AssertionError(); 
+            }
+            
+//            switch (ser_obj) {
+//                case Ball ball -> SetupCustomBall(ball);
+//                case Paddle paddle -> ChangePaddle(padL,paddle);
+//                default -> throw new AssertionError();
+//            }
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    private void SaveBallFile(){
+    private void SaveFiles(){
         try {
             timeline.stop();
             if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
                 SerializationUtils.write(ball, BALL_FILE_NAME);
+                SerializationUtils.write(padL, LEFT_RECTANGLE_FILE_NAME);
+                SerializationUtils.write(padR, RIGHT_RECTANGLE_FILE_NAME);
+                //SerializationUtils.write(this, SAVE_FILE_NAME);
             }
         } catch (IOException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     // </editor-fold> 
-
+    
     //<editor-fold defaultstate="collapsed" desc="Listeners">
     private void SetListeners() {
         
@@ -277,7 +309,7 @@ public class SingleplayerController implements Initializable {
                         // stage is set. now is the right time to do whatever we need to the stage in the controller.
                         Stage stage = (Stage) newWindow;
                         stage.setOnCloseRequest(e -> {
-                            SaveBallFile();
+                            SaveFiles();
                             Platform.exit();
                         });
                         stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event)->escapeKeyPressed(event));
@@ -309,5 +341,20 @@ public class SingleplayerController implements Initializable {
         }
     }
     // </editor-fold> 
+
+    private boolean CheckFileExistance() {
+        return new File(BALL_FILE_NAME).exists()
+                && new File(LEFT_RECTANGLE_FILE_NAME).exists()
+                && new File(RIGHT_RECTANGLE_FILE_NAME).exists();
+    }
+
+    private void LoadScoreAndTimeline(String FILE_NAME) {
+        try {
+            SingleplayerController ser_obj = (SingleplayerController) SerializationUtils.read(FILE_NAME);
+            timeline.setRate(ser_obj.timeline.getCurrentRate());          
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
 
