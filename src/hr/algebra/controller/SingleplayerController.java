@@ -87,7 +87,7 @@ public class SingleplayerController implements Initializable {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
         SetGameplaySpeed(GAME_SPEED);
-        SetOnExitEvent();
+        SetListeners();
     }
     
     //<editor-fold defaultstate="collapsed" desc="GameBounds">
@@ -224,6 +224,7 @@ public class SingleplayerController implements Initializable {
     }
     // </editor-fold> 
 
+    //<editor-fold defaultstate="collapsed" desc="Serialization">
     private void DetectSaveDataFile() {
         if (AlertUtils.infoBox("Would you like to load data?", "Save file detected", "Info")) {
             LoadBallFile();
@@ -271,8 +272,10 @@ public class SingleplayerController implements Initializable {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    // </editor-fold> 
 
-    private void SetOnExitEvent() {
+    //<editor-fold defaultstate="collapsed" desc="Listeners">
+    private void SetListeners() {
         
         PlayingField.sceneProperty().addListener((observableScene, oldScene, newScene) -> {
             if (oldScene == null && newScene != null) {
@@ -314,5 +317,5 @@ public class SingleplayerController implements Initializable {
             }
         }
     }
-    
+    // </editor-fold> 
 }

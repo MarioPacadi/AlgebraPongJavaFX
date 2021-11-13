@@ -17,7 +17,7 @@ public final class MovementHandler {
     private static boolean downPressedL, upPressedL;
     private static boolean downPressedR, upPressedR;
     
-    private static final EventHandler<KeyEvent> Move = new EventHandler<KeyEvent>() {
+    private static final EventHandler<KeyEvent> MOVE = new EventHandler<KeyEvent>() {
         @Override
         public void handle(KeyEvent event) {
             switch (event.getCode()) {
@@ -37,7 +37,7 @@ public final class MovementHandler {
         }
     };
     
-    private static final EventHandler<KeyEvent> Stand = new EventHandler<KeyEvent>() {
+    private static final EventHandler<KeyEvent> STAND = new EventHandler<KeyEvent>() {
         @Override
         public void handle(KeyEvent event) {
             switch (event.getCode()) {
@@ -59,11 +59,11 @@ public final class MovementHandler {
     
     //---Get---
     public static EventHandler<KeyEvent> getMove() {
-        return Move;
+        return MOVE;
     }
 
     public static EventHandler<KeyEvent> getStand() {
-        return Stand;
+        return STAND;
     }
      
     public static boolean isDownPressedL() {

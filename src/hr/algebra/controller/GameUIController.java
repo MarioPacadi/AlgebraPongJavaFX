@@ -55,7 +55,7 @@ public class GameUIController implements Initializable {
         Parent root = FXMLLoader.load(getClass().getResource(path));
         Scene scene = new Scene(root);
         scene.setOnKeyPressed(MovementHandler.getMove());
-        scene.setOnKeyReleased(MovementHandler.getStand());        
+        scene.setOnKeyReleased(MovementHandler.getStand());      
         window.setScene(scene);
         //window.setResizable(true);
         window.show();       
