@@ -9,13 +9,10 @@ import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.TimelineExtensions;
 import hr.algebra.handler.MovementHandler;
-import hr.algebra.serialization.ComponentCoordinates;
 import hr.algebra.utilities.AlertUtils;
 import hr.algebra.utilities.SerializationUtils;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
@@ -26,7 +23,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -69,12 +65,9 @@ public class SingleplayerController implements Initializable {
     
     // </editor-fold>
 
-    List<ComponentCoordinates> coordinates;
-    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        coordinates = new ArrayList();
         DetectSaveDataFile();
       
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
@@ -232,7 +225,7 @@ public class SingleplayerController implements Initializable {
 
     //<editor-fold defaultstate="collapsed" desc="Serialization">
     private void DetectSaveDataFile() {
-        if (AlertUtils.infoBox("Would you like to load data?", "Save file detected", "Info")) {
+        if (AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
             LoadBallFile();
         } else {
             SetupDefaultBall();
@@ -248,16 +241,11 @@ public class SingleplayerController implements Initializable {
     
     private void LoadBallFile() {
         try {
+            SetupDefaultBall();
             Ball ser_ball = (Ball) SerializationUtils.read(FILE_NAME);  
-            
             ball.setCenterX(ser_ball.getCenterX());
             ball.setCenterY(ser_ball.getCenterY());  
-            start_posX = ser_ball.getCenterX();
-            start_posY = ser_ball.getCenterY();
-            ball.setDx(GenRandom());
-            ball.setDy(GenRandom());
-            //SetupDefaultBall();
-                       
+                  
             System.out.println("{Ser_ball "+ser_ball.toString()+" }");
             System.out.println("{Ball "+ball.toString()+" }");
 
@@ -269,24 +257,9 @@ public class SingleplayerController implements Initializable {
     private void SaveBallFile(){
         try {
             timeline.stop();
-            if (AlertUtils.infoBox("Would you like to save your game?", "Save game data", "Info")) {
-                //coordinates.add(new ComponentCoordinates(ball.getId(), Double.toString(ball.getCenterX()), Double.toString(ball.getCenterY())));
+            if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
                 SerializationUtils.write(ball, FILE_NAME);
                 System.out.println("{Ball "+ball.toString()+ball.getId()+ "}"); 
-                
-//                PlayingField.sceneProperty().addListener((observableScene, oldScene, newScene) -> {
-//                    if (oldScene == null && newScene != null) {
-//                        // scene is set for the first time. Now its the time to listen stage changes.
-//                        newScene.windowProperty().addListener((observableWindow, oldWindow, newWindow) -> {
-//                            if (oldWindow == null && newWindow != null) {
-//                                // stage is set. now is the right time to do whatever we need to the stage in the controller.
-//                                Stage stage = (Stage) newWindow;
-//                                stage.
-//                            }
-//                        });
-//                    }
-//                });
-                //JavaFx components such as Shapes aren't saved as @data when serializing (such as CenterX and CenterY cords)
             }        
         } catch (IOException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
