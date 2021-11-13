@@ -5,7 +5,11 @@
  */
 package hr.algebra.model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Objects;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
@@ -15,6 +19,8 @@ import javafx.scene.shape.Circle;
  */
 public class Ball extends Circle implements Serializable  {
 
+    private static final long serialVersionUID = 1L;
+    
     private final double BALL_ACCELERATION=0.8;   
   
     private int hit = 0;
@@ -41,6 +47,18 @@ public class Ball extends Circle implements Serializable  {
 
         this.setCenterX(x);
         this.setCenterY(y);
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        oos.writeUTF(Double.toString(this.getCenterX()));
+        oos.writeUTF(Double.toString(this.getCenterY()));
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        this.setCenterX(Double.parseDouble(ois.readUTF()));
+        this.setCenterY(Double.parseDouble(ois.readUTF()));
     }
     
     //Getter and setter
