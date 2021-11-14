@@ -16,8 +16,8 @@ public class GameStat implements Serializable {
     
     public static final int GAME_SPEED = 5;
     private double gameSpeedRate;
-    private double start_posX;
-    private double start_posY;
+    private double start_posX, start_posY;
+    private String LeftScore, RightScore;
 
     public GameStat() {
     }
@@ -26,7 +26,7 @@ public class GameStat implements Serializable {
         this.start_posX = start_posX;
         this.start_posY = start_posY;
     }
-
+    
     public double getGameSpeedRate() {
         return gameSpeedRate;
     }
@@ -39,6 +39,22 @@ public class GameStat implements Serializable {
         return start_posY;
     }
     
+    public String getLeftScore() {
+        return LeftScore;
+    }
+
+    public String getRightScore() {
+        return RightScore;
+    }
+
+    public void setLeftScore(String lbLeft) {
+        this.LeftScore = lbLeft;
+    }
+
+    public void setRightScore(String lbRight) {
+        this.RightScore = lbRight;
+    }
+
     public void setGameSpeedRate(double gameSpeedRate) {
         this.gameSpeedRate = gameSpeedRate;
     }
@@ -50,9 +66,10 @@ public class GameStat implements Serializable {
     public void setStart_posY(double start_posY) {
         this.start_posY = start_posY;
     }
-    
+
     @Override
     public String toString() {
-        return "GameStat{" + "gameSpeedRate=" + gameSpeedRate + ", start_posX=" + start_posX + ", start_posY=" + start_posY + '}';
+        return "GameStat{" + "gameSpeedRate=" + gameSpeedRate + ", start_posX=" + start_posX + ", start_posY=" + start_posY + ", lbLeft=" + LeftScore + ", lbRight=" + RightScore + '}';
     }
+    
 }

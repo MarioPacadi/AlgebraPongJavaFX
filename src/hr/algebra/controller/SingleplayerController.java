@@ -16,6 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
@@ -45,11 +48,7 @@ public class SingleplayerController implements Initializable,Serializable {
     private static final String LEFT_RECTANGLE_FILE_NAME = "left_rectangle.ser";
     private static final String RIGHT_RECTANGLE_FILE_NAME = "right_rectangle.ser";
     
-    private GameStat game;
-    
-    private final int GAME_SPEED=5;
-    private static double start_posX;
-    private static double start_posY;
+    private GameStat game;  
     
     @FXML
     private Pane PlayingField;
@@ -71,8 +70,6 @@ public class SingleplayerController implements Initializable,Serializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         game=new GameStat(ball.getCenterX(),ball.getCenterY());
-        start_posX = ball.getCenterX();
-        start_posY = ball.getCenterY();
 
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
@@ -88,10 +85,10 @@ public class SingleplayerController implements Initializable,Serializable {
                 //ReadStats();
         }));
         
-               DetectSaveDataFile();
+        DetectSaveDataFile();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-        SetGameplaySpeed(GAME_SPEED);
+        SetGameplaySpeed(GameStat.GAME_SPEED);
         SetListeners();
     }
     
@@ -167,8 +164,10 @@ public class SingleplayerController implements Initializable,Serializable {
 
     private int GenRandom() {
         int num;
-        int min=-1, max=1;
-        do{ num=ThreadLocalRandom.current().nextInt(min, max + 1); }while(num==0);
+        int min = -1, max = 1;
+        do {
+            num = ThreadLocalRandom.current().nextInt(min, max + 1);
+        } while (num == 0);
         return num;
     }
     
@@ -197,17 +196,21 @@ public class SingleplayerController implements Initializable,Serializable {
         int isHit = ball.getHit();
         if (isHit != 0 && !(isHit > 1) && !(isHit < -1)) {
             //return to start
-            ball.setCenterX(start_posX);
-            ball.setCenterY(start_posY);
+            ball.setCenterX(game.getStart_posX());
+            ball.setCenterY(game.getStart_posY());
 
-            if (isHit > 0) {SetScore(lbLeft);} 
-            else {SetScore(lbRight);}
+            if (isHit > 0) {SetScore(lbLeft,1);} 
+            else {SetScore(lbRight,1);}
             ball.setHit(0);
         }
     }
+    
+    private String GetScore(Label label){
+        return label.getText();
+    }
 
-    private void SetScore(Label label) {
-        int point=(Integer.parseInt(label.getText())+1);       
+    private void SetScore(Label label,Integer num) {
+        int point=(Integer.parseInt(label.getText())+num);       
         label.setText(Integer.toString(point));
     }
 
@@ -233,11 +236,10 @@ public class SingleplayerController implements Initializable,Serializable {
     private void DetectSaveDataFile() {
         
         if (CheckFileExistance() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
-            LoadFile(ball,BALL_FILE_NAME);
-            LoadFile(padL,LEFT_RECTANGLE_FILE_NAME);
-            LoadFile(padR,RIGHT_RECTANGLE_FILE_NAME);
-            LoadFile(game,GAMESTAT_FILE_NAME);
-            //LoadGameStatFile(GAMESTAT_FILE_NAME);
+            LoadFile(ball,FileName.BALL.name);
+            LoadFile(padL,FileName.LEFT_RECTANGLE.name);
+            LoadFile(padR,FileName.RIGHT_RECTANGLE.name);
+            LoadFile(game,FileName.GAMESTAT.name);
         } else {
             SetupDefaultBall();
         }
@@ -264,15 +266,13 @@ public class SingleplayerController implements Initializable,Serializable {
     private void LoadFile(Object object,String file_name) {
         try {
             Class<?> clazz = Class.forName(object.getClass().getName());
-            Object ser_obj = (Object) SerializationUtils.read(file_name);         
-        
-            System.out.println(ser_obj.getClass().getSimpleName());
+            Object ser_obj = (Object) SerializationUtils.read(file_name);                    
             
             switch (ser_obj.getClass().getSimpleName()) {
                 case "Ball": SetupCustomBall((Ball)ser_obj); break;
                 case "Paddle": SetupPaddle((Paddle) object, (Paddle)ser_obj); break;
-                case "GameStat": SetupTimeline((GameStat)ser_obj); break;
-                default: throw new AssertionError(); 
+                case "GameStat": SetupGameStats((GameStat)ser_obj); break;
+                default: throw new AssertionError();
             }
             
             //Ball.class.getSimpleName()
@@ -290,11 +290,13 @@ public class SingleplayerController implements Initializable,Serializable {
         try {
             timeline.stop();
             if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
-                SerializationUtils.write(ball, BALL_FILE_NAME);
-                SerializationUtils.write(padL, LEFT_RECTANGLE_FILE_NAME);
-                SerializationUtils.write(padR, RIGHT_RECTANGLE_FILE_NAME);
+                SerializationUtils.write(ball, FileName.BALL.name);
+                SerializationUtils.write(padL, FileName.LEFT_RECTANGLE.name);
+                SerializationUtils.write(padR, FileName.RIGHT_RECTANGLE.name);
                 game.setGameSpeedRate(timeline.getRate());
-                SerializationUtils.write(game, GAMESTAT_FILE_NAME);
+                game.setLeftScore(GetScore(lbLeft));
+                game.setRightScore(GetScore(lbRight));
+                SerializationUtils.write(game, FileName.GAMESTAT.name);
             }
         } catch (IOException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
@@ -316,14 +318,14 @@ public class SingleplayerController implements Initializable,Serializable {
                             SaveFiles();
                             Platform.exit();
                         });
-                        stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event)->escapeKeyPressed(event));
+                        stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event)->onKeyPressed(event));
                     }
                 });
             }
         });               
     }
 
-    public void escapeKeyPressed(KeyEvent keyEvent) {
+    public void onKeyPressed(KeyEvent keyEvent) {
         //Pause game
         switch (keyEvent.getCode()) {
             case ESCAPE:
@@ -347,14 +349,48 @@ public class SingleplayerController implements Initializable,Serializable {
     // </editor-fold> 
 
     private boolean CheckFileExistance() {
-        return new File(BALL_FILE_NAME).exists()
-                && new File(LEFT_RECTANGLE_FILE_NAME).exists()
-                && new File(RIGHT_RECTANGLE_FILE_NAME).exists();
+        //All files must exist
+        Boolean files_existance=true;
+        for (FileName file_name : FileName.values()) {
+            files_existance=(new File(file_name.name)).exists();
+        }
+        return files_existance;
     }
 
-    private void SetupTimeline(GameStat gameStat) {
+    private void SetupGameStats(GameStat gameStat) {
         System.out.println(gameStat);
         timeline.setRate(gameStat.getGameSpeedRate());
+        SetScore(lbLeft,Integer.parseInt(gameStat.getLeftScore()));
+        SetScore(lbRight, Integer.parseInt(gameStat.getRightScore()));
     }
+    
+    private static enum FileName {
+        BALL("ball.ser"),
+        GAMESTAT("gameStat.ser"),
+        LEFT_RECTANGLE("left_rectangle.ser"),
+        RIGHT_RECTANGLE("right_rectangle.ser");
+
+        private final String name;       
+
+        private FileName(String name) {
+            this.name = name;
+        }
+
+        public static Optional<FileName> from(String name) {
+            for (FileName value : values()) {
+                if (value.name.equals(name)) {
+                    return Optional.of(value);
+                }
+            }
+            return Optional.empty();
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }     
+        
+    }
+    
 }
 
