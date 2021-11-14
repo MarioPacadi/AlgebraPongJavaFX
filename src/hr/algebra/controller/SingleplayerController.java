@@ -9,6 +9,7 @@ import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.TimelineExtensions;
 import hr.algebra.handler.MovementHandler;
+import hr.algebra.model.helper.FileName;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.utilities.AlertUtils;
 import hr.algebra.utilities.SerializationUtils;
@@ -16,9 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
@@ -43,12 +41,8 @@ public class SingleplayerController implements Initializable,Serializable {
 
     // <editor-fold defaultstate="collapsed" desc="Variables">   
     
-    private static final String BALL_FILE_NAME = "ball.ser";
-    private static final String GAMESTAT_FILE_NAME = "gameStat.ser";
-    private static final String LEFT_RECTANGLE_FILE_NAME = "left_rectangle.ser";
-    private static final String RIGHT_RECTANGLE_FILE_NAME = "right_rectangle.ser";
-    
-    private GameStat game;  
+    private GameStat game;
+    private Timeline timeline;
     
     @FXML
     private Pane PlayingField;
@@ -62,9 +56,7 @@ public class SingleplayerController implements Initializable,Serializable {
     private Label lbPause;
     @FXML
     private Label lbLeft,lbRight;
-    
-    private Timeline timeline;   
-    
+     
     // </editor-fold>
 
     @Override
@@ -108,7 +100,7 @@ public class SingleplayerController implements Initializable,Serializable {
         if (PaddelContact(pad)) {
             ball.setDx(ball.getDx()*-1);
             TimelineExtensions.increaseSpeed(timeline,ball.getBALL_ACCELERATION());
-            //System.out.println(BOING);
+            //System.out.println("BOING");
         }
 
     }
@@ -232,42 +224,50 @@ public class SingleplayerController implements Initializable,Serializable {
     }
     // </editor-fold> 
 
-    //<editor-fold defaultstate="collapsed" desc="Serialization">
-    private void DetectSaveDataFile() {
-        
-        if (CheckFileExistance() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
-            LoadFile(ball,FileName.BALL.name);
-            LoadFile(padL,FileName.LEFT_RECTANGLE.name);
-            LoadFile(padR,FileName.RIGHT_RECTANGLE.name);
-            LoadFile(game,FileName.GAMESTAT.name);
-        } else {
-            SetupDefaultBall();
-        }
-    }
-    
+    //<editor-fold defaultstate="collapsed" desc="Setup Components">
     private void SetupDefaultBall() {
         ball.setDx(GenRandom());
         ball.setDy(GenRandom());
     }
-    
+
     private void SetupCustomBall(Ball customBall) {
         ball.setCenterX(customBall.getCenterX());
         ball.setCenterY(customBall.getCenterY());
         ball.setDx(customBall.getDx());
         ball.setDy(customBall.getDy());
     }
-    
-    private void SetupPaddle(Paddle paddle,Paddle custom) {
+
+    private void SetupPaddle(Paddle paddle, Paddle custom) {
         paddle.setX(custom.getX());
         paddle.setY(custom.getY());
-        paddle.vy=custom.vy;
+        paddle.vy = custom.vy;
     }
+
+    private void SetupGameStats(GameStat gameStat) {
+        System.out.println(gameStat);
+        timeline.setRate(gameStat.getGameSpeedRate());
+        SetScore(lbLeft, Integer.parseInt(gameStat.getLeftScore()));
+        SetScore(lbRight, Integer.parseInt(gameStat.getRightScore()));
+    }
+    // </editor-fold> 
     
+    //<editor-fold defaultstate="collapsed" desc="Serialization">
+    private void DetectSaveDataFile() {     
+        if (FileName.CheckFileExistance() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
+            LoadFile(ball,FileName.BALL.toString());
+            LoadFile(padL,FileName.LEFT_RECTANGLE.toString());
+            LoadFile(padR,FileName.RIGHT_RECTANGLE.toString());
+            LoadFile(game,FileName.GAMESTAT.toString());
+        } else {
+            SetupDefaultBall();
+        }
+    }   
+        
     private void LoadFile(Object object,String file_name) {
         try {
             Class<?> clazz = Class.forName(object.getClass().getName());
-            Object ser_obj = (Object) SerializationUtils.read(file_name);                    
-            
+            Object ser_obj = (Object) SerializationUtils.read(file_name);          
+
             switch (ser_obj.getClass().getSimpleName()) {
                 case "Ball": SetupCustomBall((Ball)ser_obj); break;
                 case "Paddle": SetupPaddle((Paddle) object, (Paddle)ser_obj); break;
@@ -290,17 +290,21 @@ public class SingleplayerController implements Initializable,Serializable {
         try {
             timeline.stop();
             if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
-                SerializationUtils.write(ball, FileName.BALL.name);
-                SerializationUtils.write(padL, FileName.LEFT_RECTANGLE.name);
-                SerializationUtils.write(padR, FileName.RIGHT_RECTANGLE.name);
-                game.setGameSpeedRate(timeline.getRate());
-                game.setLeftScore(GetScore(lbLeft));
-                game.setRightScore(GetScore(lbRight));
-                SerializationUtils.write(game, FileName.GAMESTAT.name);
+                SerializationUtils.write(ball, FileName.BALL.toString());
+                SerializationUtils.write(padL, FileName.LEFT_RECTANGLE.toString());
+                SerializationUtils.write(padR, FileName.RIGHT_RECTANGLE.toString());
+                FillGameStats();
+                SerializationUtils.write(game, FileName.GAMESTAT.toString());
             }
         } catch (IOException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private void FillGameStats() {
+        game.setGameSpeedRate(timeline.getRate());
+        game.setLeftScore(GetScore(lbLeft));
+        game.setRightScore(GetScore(lbRight));
     }
     // </editor-fold> 
     
@@ -347,50 +351,5 @@ public class SingleplayerController implements Initializable,Serializable {
         }
     }
     // </editor-fold> 
-
-    private boolean CheckFileExistance() {
-        //All files must exist
-        Boolean files_existance=true;
-        for (FileName file_name : FileName.values()) {
-            files_existance=(new File(file_name.name)).exists();
-        }
-        return files_existance;
-    }
-
-    private void SetupGameStats(GameStat gameStat) {
-        System.out.println(gameStat);
-        timeline.setRate(gameStat.getGameSpeedRate());
-        SetScore(lbLeft,Integer.parseInt(gameStat.getLeftScore()));
-        SetScore(lbRight, Integer.parseInt(gameStat.getRightScore()));
-    }
-    
-    private static enum FileName {
-        BALL("ball.ser"),
-        GAMESTAT("gameStat.ser"),
-        LEFT_RECTANGLE("left_rectangle.ser"),
-        RIGHT_RECTANGLE("right_rectangle.ser");
-
-        private final String name;       
-
-        private FileName(String name) {
-            this.name = name;
-        }
-
-        public static Optional<FileName> from(String name) {
-            for (FileName value : values()) {
-                if (value.name.equals(name)) {
-                    return Optional.of(value);
-                }
-            }
-            return Optional.empty();
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }     
-        
-    }
-    
 }
 
