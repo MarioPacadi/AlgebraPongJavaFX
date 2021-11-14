@@ -9,12 +9,12 @@ import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.TimelineExtensions;
 import hr.algebra.handler.MovementHandler;
+import hr.algebra.serializable.GameStat;
 import hr.algebra.utilities.AlertUtils;
 import hr.algebra.utilities.SerializationUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
@@ -38,14 +38,14 @@ import javafx.util.Duration;
  */
 public class SingleplayerController implements Initializable,Serializable {
 
-    // <editor-fold defaultstate="collapsed" desc="Variables">
-
-    private static final long serialVersionUID = 3L;
+    // <editor-fold defaultstate="collapsed" desc="Variables">   
     
     private static final String BALL_FILE_NAME = "ball.ser";
-    private static final String SAVE_FILE_NAME = "singleplayer.ser";
+    private static final String GAMESTAT_FILE_NAME = "gameStat.ser";
     private static final String LEFT_RECTANGLE_FILE_NAME = "left_rectangle.ser";
     private static final String RIGHT_RECTANGLE_FILE_NAME = "right_rectangle.ser";
+    
+    private GameStat game;
     
     private final int GAME_SPEED=5;
     private static double start_posX;
@@ -70,12 +70,10 @@ public class SingleplayerController implements Initializable,Serializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+        game=new GameStat(ball.getCenterX(),ball.getCenterY());
         start_posX = ball.getCenterX();
         start_posY = ball.getCenterY();
-        
-        DetectSaveDataFile();
-      
+
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
                 checkInput();
@@ -89,6 +87,8 @@ public class SingleplayerController implements Initializable,Serializable {
                 checkGameBounds();
                 //ReadStats();
         }));
+        
+               DetectSaveDataFile();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
         SetGameplaySpeed(GAME_SPEED);
@@ -236,7 +236,8 @@ public class SingleplayerController implements Initializable,Serializable {
             LoadFile(ball,BALL_FILE_NAME);
             LoadFile(padL,LEFT_RECTANGLE_FILE_NAME);
             LoadFile(padR,RIGHT_RECTANGLE_FILE_NAME);
-            //LoadScoreAndTimeline(SAVE_FILE_NAME);
+            LoadFile(game,GAMESTAT_FILE_NAME);
+            //LoadGameStatFile(GAMESTAT_FILE_NAME);
         } else {
             SetupDefaultBall();
         }
@@ -254,7 +255,7 @@ public class SingleplayerController implements Initializable,Serializable {
         ball.setDy(customBall.getDy());
     }
     
-    private void ChangePaddle(Paddle paddle,Paddle custom) {
+    private void SetupPaddle(Paddle paddle,Paddle custom) {
         paddle.setX(custom.getX());
         paddle.setY(custom.getY());
         paddle.vy=custom.vy;
@@ -264,15 +265,17 @@ public class SingleplayerController implements Initializable,Serializable {
         try {
             Class<?> clazz = Class.forName(object.getClass().getName());
             Object ser_obj = (Object) SerializationUtils.read(file_name);         
-       
-            //Ball.class.getSimpleName()
+        
+            System.out.println(ser_obj.getClass().getSimpleName());
             
             switch (ser_obj.getClass().getSimpleName()) {
                 case "Ball": SetupCustomBall((Ball)ser_obj); break;
-                case "Paddle": ChangePaddle((Paddle) object, (Paddle)ser_obj); break;
+                case "Paddle": SetupPaddle((Paddle) object, (Paddle)ser_obj); break;
+                case "GameStat": SetupTimeline((GameStat)ser_obj); break;
                 default: throw new AssertionError(); 
             }
             
+            //Ball.class.getSimpleName()
 //            switch (ser_obj) {
 //                case Ball ball -> SetupCustomBall(ball);
 //                case Paddle paddle -> ChangePaddle(padL,paddle);
@@ -290,7 +293,8 @@ public class SingleplayerController implements Initializable,Serializable {
                 SerializationUtils.write(ball, BALL_FILE_NAME);
                 SerializationUtils.write(padL, LEFT_RECTANGLE_FILE_NAME);
                 SerializationUtils.write(padR, RIGHT_RECTANGLE_FILE_NAME);
-                //SerializationUtils.write(this, SAVE_FILE_NAME);
+                game.setGameSpeedRate(timeline.getRate());
+                SerializationUtils.write(game, GAMESTAT_FILE_NAME);
             }
         } catch (IOException ex) {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
@@ -348,13 +352,9 @@ public class SingleplayerController implements Initializable,Serializable {
                 && new File(RIGHT_RECTANGLE_FILE_NAME).exists();
     }
 
-    private void LoadScoreAndTimeline(String FILE_NAME) {
-        try {
-            SingleplayerController ser_obj = (SingleplayerController) SerializationUtils.read(FILE_NAME);
-            timeline.setRate(ser_obj.timeline.getCurrentRate());          
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    private void SetupTimeline(GameStat gameStat) {
+        System.out.println(gameStat);
+        timeline.setRate(gameStat.getGameSpeedRate());
     }
 }
 
