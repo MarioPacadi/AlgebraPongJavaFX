@@ -6,7 +6,6 @@
 package hr.algebra.model.helper;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -18,8 +17,8 @@ import java.util.Optional;
 public enum FileName {
     BALL("SaveFiles/ball.ser"),
     GAMESTAT("SaveFiles/gameStat.ser"),
-    LEFT_RECTANGLE("SaveFiles/left_rectangle.ser"),
-    RIGHT_RECTANGLE("SaveFiles/right_rectangle.ser");
+    LEFT_RECTANGLE("SaveFiles/Paddles/left_paddle.ser"),
+    RIGHT_RECTANGLE("SaveFiles/Paddles/right_paddle.ser");
 
     private final String name;
 
@@ -42,9 +41,9 @@ public enum FileName {
         for (FileName file_name : FileName.values()) {
             File dir = new File(file_name.name);
             if (!dir.getParentFile().exists()) {
-                dir.mkdirs(); //Create dir, if not exist
+                dir.getParentFile().mkdirs(); //Create dir, if not exist
             }
-            files_existance=dir.exists();
+            files_existance=dir.exists() && !dir.isDirectory();
         }
         return files_existance;
     }

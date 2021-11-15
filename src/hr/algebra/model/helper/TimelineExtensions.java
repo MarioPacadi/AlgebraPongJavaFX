@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hr.algebra.model;
+package hr.algebra.model.helper;
 
 import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;

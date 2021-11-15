@@ -7,16 +7,22 @@ package hr.algebra.controller;
 
 import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
-import hr.algebra.model.TimelineExtensions;
+import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.handler.MovementHandler;
 import hr.algebra.model.helper.FileName;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.utilities.AlertUtils;
+import hr.algebra.utilities.ReflectionUtils;
 import hr.algebra.utilities.SerializationUtils;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
@@ -39,6 +45,11 @@ import javafx.util.Duration;
  */
 public class SingleplayerController implements Initializable,Serializable {
 
+    private static final String DOCUMENTATION_FILENAME = "documentation.txt";
+    private static final String CLASSES_PATH = "src/hr/algebra/model";
+    private static final String CLASSES_PACKAGE
+            = CLASSES_PATH.substring(CLASSES_PATH.indexOf("/") + 1).replace("/", ".").concat(".");
+    
     // <editor-fold defaultstate="collapsed" desc="Variables">   
     
     private GameStat game;
@@ -81,7 +92,9 @@ public class SingleplayerController implements Initializable,Serializable {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
         SetGameplaySpeed(GameStat.GAME_SPEED);
-        SetListeners();
+        SetListeners(); 
+        
+        CreateDocumentation();
     }
     
     //<editor-fold defaultstate="collapsed" desc="GameBounds">
@@ -154,7 +167,8 @@ public class SingleplayerController implements Initializable,Serializable {
         }
     }
 
-    private int GenRandom() {
+    //Ova funkcija se konstantno delete-a 
+    private int GenRandomDirection() {
         int num;
         int min = -1, max = 1;
         do {
@@ -183,7 +197,7 @@ public class SingleplayerController implements Initializable,Serializable {
     }
     // </editor-fold>   
     
-    //<editor-fold defaultstate="collapsed" desc="Score">
+    //<editor-fold defaultstate="collapsed" desc="Score and Documentation">
     private void ChangeScore() {
         int isHit = ball.getHit();
         if (isHit != 0 && !(isHit > 1) && !(isHit < -1)) {
@@ -222,12 +236,49 @@ public class SingleplayerController implements Initializable,Serializable {
         
         System.out.println(sb.toString());
     }
+    
+    private void CreateDocumentation() {
+
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(DOCUMENTATION_FILENAME))) {
+            DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(CLASSES_PATH));
+
+            StringBuilder classAndMembersInfo = new StringBuilder();
+            stream.forEach(file -> {
+                String filename = file.getFileName().toString();
+                if (!filename.contains(".")) {
+                    return; //model ima package helper, stoga treba ignorirati ga
+                }
+                String className = filename.substring(0, filename.indexOf("."));
+
+                classAndMembersInfo
+                        .append(className)
+                        .append(System.lineSeparator());
+
+                try {
+                    Class<?> clazz = Class.forName(CLASSES_PACKAGE.concat(className));
+                    ReflectionUtils.readClassAndMembersInfo(clazz, classAndMembersInfo);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                classAndMembersInfo
+                        .append(System.lineSeparator())
+                        .append(System.lineSeparator());
+
+            });
+
+            writer.write(classAndMembersInfo.toString());
+
+        } catch (IOException ex) {
+            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     // </editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="Setup Components">
     private void SetupDefaultBall() {
-        ball.setDx(GenRandom());
-        ball.setDy(GenRandom());
+        ball.setDx(GenRandomDirection());
+        ball.setDy(GenRandomDirection());
     }
 
     private void SetupCustomBall(Ball customBall) {

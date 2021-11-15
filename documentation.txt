@@ -1,0 +1,83 @@
+Ball
+package hr.algebra.model
+
+public Ball
+extends javafx.scene.shape.Circle javafx.scene.shape.Shape javafx.scene.Node java.lang.Object
+implements java.io.Serializable
+
+private static final long hr.algebra.model.Ball.serialVersionUID
+private final double hr.algebra.model.Ball.BALL_ACCELERATION
+private int hr.algebra.model.Ball.hit
+private int hr.algebra.model.Ball.dx
+private int hr.algebra.model.Ball.dy
+
+
+public class java.lang.String toString()
+
+
+private void readObject(java.io.ObjectInputStream arg0) throws java.io.IOException java.lang.ClassNotFoundException
+
+
+private void writeObject(java.io.ObjectOutputStream arg0) throws java.io.IOException
+
+
+public void moveBall(javafx.scene.layout.Pane arg0)
+
+
+public double getBALL_ACCELERATION()
+
+
+public void setDx(int arg0)
+
+
+public int getHit()
+
+
+public void setHit(int arg0)
+
+
+public int getDy()
+
+
+public void setDy(int arg0)
+
+
+public int getDx()
+
+
+public hr.algebra.model.Ball()
+
+Paddle
+package hr.algebra.model
+
+public Paddle
+extends javafx.scene.shape.Rectangle javafx.scene.shape.Shape javafx.scene.Node java.lang.Object
+implements java.io.Serializable
+
+private static final long hr.algebra.model.Paddle.serialVersionUID
+public double hr.algebra.model.Paddle.vy
+private static final double hr.algebra.model.Paddle.SPEED
+private static final double hr.algebra.model.Paddle.STOP_SPEED
+private static final double hr.algebra.model.Paddle.ACCELERATION
+
+
+private void readObject(java.io.ObjectInputStream arg0) throws java.io.IOException java.lang.ClassNotFoundException
+
+
+private void writeObject(java.io.ObjectOutputStream arg0) throws java.io.IOException
+
+
+public void moveUpward()
+
+
+public void slowDown()
+
+
+public void moveDownward()
+
+
+public void updatePosition()
+
+
+public hr.algebra.model.Paddle()
+
