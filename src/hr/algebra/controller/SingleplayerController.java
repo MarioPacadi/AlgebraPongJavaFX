@@ -238,7 +238,6 @@ public class SingleplayerController implements Initializable,Serializable {
     }
     
     private void CreateDocumentation() {
-
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(DOCUMENTATION_FILENAME))) {
             DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(CLASSES_PATH));
 
