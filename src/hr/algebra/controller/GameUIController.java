@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -27,6 +28,7 @@ import javafx.stage.Stage;
 public class GameUIController implements Initializable {
     
     private static final String SINGLEPLAYER_PATH="/hr/algebra/view/Singleplayer.fxml";
+    private static final String MULTIPLAYER_PATH="/hr/algebra/view/Multiplayer.fxml";
     
     @FXML
     private AnchorPane mainPane;
@@ -42,29 +44,38 @@ public class GameUIController implements Initializable {
     @FXML
     private void btnSinglePlayerClick()
     {
+        OpenWindow(SINGLEPLAYER_PATH);
+    } 
+    
+    @FXML
+    private void btnMultiPlayerClick() {
+        OpenWindow(MULTIPLAYER_PATH);
+    }
+    
+    @FXML
+    private void btnExitClick()
+    {
+        Platform.exit();
+    }
+
+    private void OpenWindow(String path) {
         Stage stage = (Stage) mainPane.getScene().getWindow();
         try {
-            start(stage,SINGLEPLAYER_PATH);
+            start(stage, path);
         } catch (Exception ex) {
             Logger.getLogger(GameUIController.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Yellow");
     }
     
-    public void start(Stage window,String path) throws Exception {
+    public void start(Stage window, String path) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource(path));
         Scene scene = new Scene(root);
         scene.setOnKeyPressed(MovementHandler.getMove());
-        scene.setOnKeyReleased(MovementHandler.getStand());      
+        scene.setOnKeyReleased(MovementHandler.getStand());
         window.setScene(scene);
         //window.setResizable(true);
-        window.show();       
-    }
-    
-    @FXML
-    private void btnExitClick()
-    {
-        System.exit(0);
+        window.show();
     }
     
 }

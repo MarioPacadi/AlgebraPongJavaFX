@@ -5,19 +5,17 @@
  */
 package hr.algebra.controller;
 
+import hr.algebra.handler.MovementHandler;
 import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
-import hr.algebra.model.helper.TimelineExtensions;
-import hr.algebra.handler.MovementHandler;
 import hr.algebra.model.helper.FileName;
+import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.utilities.AlertUtils;
 import hr.algebra.utilities.ReflectionUtils;
 import hr.algebra.utilities.SerializationUtils;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -41,20 +39,15 @@ import javafx.util.Duration;
 /**
  * FXML Controller class
  *
- * @author Mario
+ * @author Atlas Comic
  */
-public class SingleplayerController implements Initializable,Serializable {
+public class MultiplayerController implements Initializable {
 
-    private static final String DOCUMENTATION_FILENAME = "documentation.txt";
-    private static final String CLASSES_PATH = "src/hr/algebra/model";
-    private static final String CLASSES_PACKAGE
-            = CLASSES_PATH.substring(CLASSES_PATH.indexOf("/") + 1).replace("/", ".").concat(".");
-    
     // <editor-fold defaultstate="collapsed" desc="Variables">   
-    
     private GameStat game;
     private Timeline timeline;
-    
+    private static final int MAX_SCORE=5;
+
     @FXML
     private Pane PlayingField;
     @FXML
@@ -62,30 +55,30 @@ public class SingleplayerController implements Initializable,Serializable {
     @FXML
     private Paddle padL;
     @FXML
-    private Paddle padR;    
+    private Paddle padR;
     @FXML
     private Label lbPause;
     @FXML
-    private Label lbLeft,lbRight;
-     
+    private Label lbLeft, lbRight;
+
     // </editor-fold>
 
+    /**
+     * Initializes the controller class.
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        game=new GameStat(ball.getCenterX(),ball.getCenterY());
+       game=new GameStat(ball.getCenterX(),ball.getCenterY());
 
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
                 checkInput();
-                botFollowBall(padR);
-                //botFollowBall(padL);
                 //physics updates
                 padL.updatePosition();
                 padR.updatePosition();                
                 ball.moveBall(PlayingField);
                 //check boundaries
                 checkGameBounds();
-                //ReadStats();
         }));
         
         DetectSaveDataFile();
@@ -93,12 +86,10 @@ public class SingleplayerController implements Initializable,Serializable {
         timeline.play();
         SetGameplaySpeed(GameStat.GAME_SPEED);
         SetListeners(); 
-        
-        CreateDocumentation();
-    }
-    
+    }    
+
     //<editor-fold defaultstate="collapsed" desc="GameBounds">
-     private void checkGameBounds(){
+    private void checkGameBounds() {
         //Paddles can't go beyond PlayingField bounds
         PaddleBoundary(padL);
         PaddleBoundary(padR);
@@ -108,15 +99,16 @@ public class SingleplayerController implements Initializable,Serializable {
         //If ball hit
         ChangeScore();
     }
-    
-    private void checkPaddle(Paddle pad){        
+
+    private void checkPaddle(Paddle pad) {
         if (PaddelContact(pad)) {
-            ball.setDx(ball.getDx()*-1);
-            TimelineExtensions.increaseSpeed(timeline,ball.getBALL_ACCELERATION());
+            ball.setDx(ball.getDx() * -1);
+            TimelineExtensions.increaseSpeed(timeline, ball.getBALL_ACCELERATION());
             //System.out.println("BOING");
         }
 
     }
+
     private boolean PaddelContact(Paddle pad) {
         double ballLeft = ball.getCenterX() - ball.getRadius(); // 47 - 20 = 27
         double ballRight = ball.getCenterX() + ball.getRadius(); // 754 + 20 = 774
@@ -127,16 +119,16 @@ public class SingleplayerController implements Initializable,Serializable {
         double padRight = pad.getX() + pad.getWidth(); // 2 + 20 = 27
         double padTop = pad.getY(); // =75
         double padBottom = pad.getY() + pad.getHeight(); // 75 + 120 = 195
-        
-        boolean TopBottom = padTop<=ballBottom && padBottom>=ballTop;
-        boolean ContactLeft = (ballLeft==padRight) && TopBottom;
-        boolean ContactRight= (ballRight==padLeft) && TopBottom;
+
+        boolean TopBottom = padTop <= ballBottom && padBottom >= ballTop;
+        boolean ContactLeft = (ballLeft == padRight) && TopBottom;
+        boolean ContactRight = (ballRight == padLeft) && TopBottom;
 
         return ContactLeft || ContactRight;
     }
-      
+
     private void PaddleBoundary(Paddle pad) {
-        double bounceStrength=1;
+        double bounceStrength = 1;
         if (pad.getY() < 0) {
             pad.setY(0);
         } else if (pad.getY() > PlayingField.getHeight() - pad.getHeight()) {
@@ -144,7 +136,7 @@ public class SingleplayerController implements Initializable,Serializable {
         }
         pad.vy = pad.vy * -bounceStrength;
     }
-     // </editor-fold> 
+    // </editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="Inputs and bot">
     private void checkInput() {
@@ -176,27 +168,15 @@ public class SingleplayerController implements Initializable,Serializable {
         } while (num == 0);
         return num;
     }
-    
+
     private void SetGameplaySpeed(int i) {
         for (int j = 0; j < i; j++) {
-            TimelineExtensions.increaseSpeed(timeline,ball.getBALL_ACCELERATION());
+            TimelineExtensions.increaseSpeed(timeline, ball.getBALL_ACCELERATION());
         }
     }
 
-    private void botFollowBall(Paddle pad) {
-        double errorMargin=0.85; // 0.85
-        
-        if (ball.getCenterX() > PlayingField.getWidth() - PlayingField.getWidth() / 4) {
-            pad.setY(ball.getCenterY()>pad.getY()+pad.getHeight()/2 ? pad.getY()+errorMargin : pad.getY()-errorMargin);
-        } 
-        //activate for auto-aim
-//        else {         
-//            pad.setY(ball.getCenterY()-pad.getHeight()/2);            
-//        }
-        
-    }
     // </editor-fold>   
-    
+
     //<editor-fold defaultstate="collapsed" desc="Score and Documentation">
     private void ChangeScore() {
         int isHit = ball.getHit();
@@ -205,73 +185,35 @@ public class SingleplayerController implements Initializable,Serializable {
             ball.setCenterX(game.getStart_posX());
             ball.setCenterY(game.getStart_posY());
 
-            if (isHit > 0) {SetScore(lbLeft,1);} 
-            else {SetScore(lbRight,1);}
+            if (isHit > 0) { SetScore(lbLeft, 1); } 
+            else { SetScore(lbRight, 1); }
+            
+            if (checkScore(lbLeft)) {
+                lbPause.setText("Left \n Won");
+                pauseGame();
+            }
+            else if (checkScore(lbRight)) {
+                lbPause.setText("Right \n Won");
+                pauseGame();
+            }
             ball.setHit(0);
         }
     }
     
-    private String GetScore(Label label){
+    private boolean checkScore(Label label) 
+    { 
+        return MAX_SCORE<=Integer.parseInt(GetScore(label));    
+    }
+
+    private String GetScore(Label label) {
         return label.getText();
     }
 
-    private void SetScore(Label label,Integer num) {
-        int point=(Integer.parseInt(label.getText())+num);       
+    private void SetScore(Label label, Integer num) {
+        int point = (Integer.parseInt(label.getText()) + num);
         label.setText(Integer.toString(point));
     }
-
-    private void ReadStats() {
-        StringBuilder sb=new StringBuilder();
-        sb.append("LeftPaddle position: ");
-        sb.append("[").append(padL.getX()).append(",").append(padL.getY()).append("]");
-        sb.append(", RightPaddle position: ");
-        sb.append("[").append(padR.getX()).append(",").append(padR.getY()).append("]");
-        sb.append(", Ball position: ");
-        sb.append("[").append(ball.getCenterX()).append(",").append(ball.getCenterY()).append("]");
-        sb.append(", Field: ");
-        sb.append("[").append(PlayingField.getWidth()).append(",").append(PlayingField.getHeight()).append("]");
-        sb.append("\n");
-        sb.append("Score: ");
-        sb.append("[").append(lbLeft.getText()).append("|").append(lbRight.getText()).append("]");
-        
-        System.out.println(sb.toString());
-    }
-    
-    private void CreateDocumentation() {
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(DOCUMENTATION_FILENAME))) {
-            DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(CLASSES_PATH));
-
-            StringBuilder classAndMembersInfo = new StringBuilder();
-            stream.forEach(file -> {
-                String filename = file.getFileName().toString();
-                if (!filename.contains(".")) {
-                    return; //model ima package helper, stoga treba ignorirati ga
-                }
-                String className = filename.substring(0, filename.indexOf("."));
-
-                classAndMembersInfo
-                        .append(className)
-                        .append(System.lineSeparator());
-
-                try {
-                    Class<?> clazz = Class.forName(CLASSES_PACKAGE.concat(className));
-                    ReflectionUtils.readClassAndMembersInfo(clazz, classAndMembersInfo);
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                classAndMembersInfo
-                        .append(System.lineSeparator())
-                        .append(System.lineSeparator());
-
-            });
-
-            writer.write(classAndMembersInfo.toString());
-
-        } catch (IOException ex) {
-            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+   
     // </editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="Setup Components">
@@ -300,31 +242,38 @@ public class SingleplayerController implements Initializable,Serializable {
         SetScore(lbRight, Integer.parseInt(gameStat.getRightScore()));
     }
     // </editor-fold> 
-    
+
     //<editor-fold defaultstate="collapsed" desc="Serialization">
-    private void DetectSaveDataFile() {     
+    private void DetectSaveDataFile() {
         if (FileName.CheckFileExistance() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
-            LoadFile(ball,FileName.BALL.toString());
-            LoadFile(padL,FileName.LEFT_RECTANGLE.toString());
-            LoadFile(padR,FileName.RIGHT_RECTANGLE.toString());
-            LoadFile(game,FileName.GAMESTAT.toString());
+            LoadFile(ball, FileName.BALL.toString());
+            LoadFile(padL, FileName.LEFT_RECTANGLE.toString());
+            LoadFile(padR, FileName.RIGHT_RECTANGLE.toString());
+            LoadFile(game, FileName.GAMESTAT.toString());
         } else {
             SetupDefaultBall();
         }
-    }   
-        
-    private void LoadFile(Object object,String file_name) {
+    }
+
+    private void LoadFile(Object object, String file_name) {
         try {
             Class<?> clazz = Class.forName(object.getClass().getName());
-            Object ser_obj = (Object) SerializationUtils.read(file_name);          
+            Object ser_obj = (Object) SerializationUtils.read(file_name);
 
             switch (ser_obj.getClass().getSimpleName()) {
-                case "Ball": SetupCustomBall((Ball)ser_obj); break;
-                case "Paddle": SetupPaddle((Paddle) object, (Paddle)ser_obj); break;
-                case "GameStat": SetupGameStats((GameStat)ser_obj); break;
-                default: throw new AssertionError();
+                case "Ball":
+                    SetupCustomBall((Ball) ser_obj);
+                    break;
+                case "Paddle":
+                    SetupPaddle((Paddle) object, (Paddle) ser_obj);
+                    break;
+                case "GameStat":
+                    SetupGameStats((GameStat) ser_obj);
+                    break;
+                default:
+                    throw new AssertionError();
             }
-            
+
             //Ball.class.getSimpleName()
 //            switch (ser_obj) {
 //                case Ball ball -> SetupCustomBall(ball);
@@ -335,8 +284,8 @@ public class SingleplayerController implements Initializable,Serializable {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    private void SaveFiles(){
+
+    private void SaveFiles() {
         try {
             timeline.stop();
             if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
@@ -350,17 +299,17 @@ public class SingleplayerController implements Initializable,Serializable {
             Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void FillGameStats() {
         game.setGameSpeedRate(timeline.getRate());
         game.setLeftScore(GetScore(lbLeft));
         game.setRightScore(GetScore(lbRight));
     }
     // </editor-fold> 
-    
+
     //<editor-fold defaultstate="collapsed" desc="Listeners">
     private void SetListeners() {
-        
+
         PlayingField.sceneProperty().addListener((observableScene, oldScene, newScene) -> {
             if (oldScene == null && newScene != null) {
                 // scene is set for the first time. Now its the time to listen stage changes.
@@ -372,26 +321,26 @@ public class SingleplayerController implements Initializable,Serializable {
                             SaveFiles();
                             Platform.exit();
                         });
-                        stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event)->onKeyPressed(event));
+                        stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> onKeyPressed(event));
                     }
                 });
             }
-        });               
+        });
     }
 
     public void onKeyPressed(KeyEvent keyEvent) {
         //Pause game
         switch (keyEvent.getCode()) {
-            case ESCAPE:
+            case ESCAPE: {
                 pauseGame();
-                break;
-            default:
-            {
+            }
+            break;
+            default: {
             }
         }
     }
     
-    private void pauseGame() {
+    private void pauseGame(){
         boolean pauseActive = !lbPause.visibleProperty().get();
         if (pauseActive) {
             PlayingField.setOpacity(0.5);
@@ -403,5 +352,5 @@ public class SingleplayerController implements Initializable,Serializable {
         lbPause.setVisible(pauseActive);
     }
     // </editor-fold> 
+    
 }
-

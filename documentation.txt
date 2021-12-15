@@ -24,16 +24,10 @@ private void writeObject(java.io.ObjectOutputStream arg0) throws java.io.IOExcep
 public void moveBall(javafx.scene.layout.Pane arg0)
 
 
-public double getBALL_ACCELERATION()
-
-
-public void setDx(int arg0)
-
-
 public int getHit()
 
 
-public void setHit(int arg0)
+public int getDx()
 
 
 public int getDy()
@@ -42,7 +36,13 @@ public int getDy()
 public void setDy(int arg0)
 
 
-public int getDx()
+public void setHit(int arg0)
+
+
+public void setDx(int arg0)
+
+
+public double getBALL_ACCELERATION()
 
 
 public hr.algebra.model.Ball()
@@ -70,14 +70,93 @@ private void writeObject(java.io.ObjectOutputStream arg0) throws java.io.IOExcep
 public void moveUpward()
 
 
+public void updatePosition()
+
+
 public void slowDown()
 
 
 public void moveDownward()
 
 
-public void updatePosition()
-
-
 public hr.algebra.model.Paddle()
+
+Pong
+package hr.algebra.model
+
+public abstract Pong
+extends java.lang.Object
+
+public hr.algebra.serializable.GameStat hr.algebra.model.Pong.game
+public javafx.animation.Timeline hr.algebra.model.Pong.timeline
+public javafx.scene.layout.Pane hr.algebra.model.Pong.PlayingField
+public hr.algebra.model.Ball hr.algebra.model.Pong.ball
+public hr.algebra.model.Paddle hr.algebra.model.Pong.padL
+public hr.algebra.model.Paddle hr.algebra.model.Pong.padR
+public javafx.scene.control.Label hr.algebra.model.Pong.lbPause
+public javafx.scene.control.Label hr.algebra.model.Pong.lbLeft
+public javafx.scene.control.Label hr.algebra.model.Pong.lbRight
+
+
+public void onKeyPressed(javafx.scene.input.KeyEvent arg0)
+
+
+private void PaddleBoundary(hr.algebra.model.Paddle arg0)
+
+
+private void ChangeScore()
+
+
+public void checkGameBounds()
+
+
+public void SetGameplaySpeed(int arg0)
+
+
+public void SetScore(javafx.scene.control.Label arg0, java.lang.Integer arg1)
+
+
+public void SetupDefaultBall()
+
+
+private boolean PaddelContact(hr.algebra.model.Paddle arg0)
+
+
+public void SetupCustomBall(hr.algebra.model.Ball arg0)
+
+
+public void SetupPaddle(hr.algebra.model.Paddle arg0, hr.algebra.model.Paddle arg1)
+
+
+public class java.lang.String GetScore(javafx.scene.control.Label arg0)
+
+
+public void SetupGameStats(hr.algebra.serializable.GameStat arg0)
+
+
+private void checkPaddle(hr.algebra.model.Paddle arg0)
+
+
+public abstract void checkInput()
+
+
+public void LoadFile(java.lang.Object arg0, java.lang.String arg1) throws java.lang.ClassNotFoundException java.io.IOException
+
+
+public abstract void SetListeners()
+
+
+public abstract void SaveFiles()
+
+
+public void FillGameStats()
+
+
+public abstract void DetectSaveDataFile()
+
+
+public int GenRandomDirection()
+
+
+public hr.algebra.model.Pong()
 

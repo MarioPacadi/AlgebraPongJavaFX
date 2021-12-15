@@ -27,7 +27,7 @@
          </rowConstraints>
          <children>
             <Button mnemonicParsing="false" onAction="#btnSinglePlayerClick" prefHeight="40.0" prefWidth="166.0" text="Singleplayer" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-            <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="166.0" text="Multiplayer" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Button mnemonicParsing="false" onAction="#btnMultiPlayerClick" prefHeight="40.0" prefWidth="166.0" text="Multiplayer" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
             <Button mnemonicParsing="false" prefHeight="44.0" prefWidth="154.0" text="Options" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
             <Button mnemonicParsing="false" onAction="#btnExitClick" prefHeight="38.0" prefWidth="129.0" text="Exit" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
             <Label alignment="CENTER" prefHeight="55.0" prefWidth="209.0" text="Algebra Pong" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER">
