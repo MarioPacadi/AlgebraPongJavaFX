@@ -26,6 +26,9 @@ public class Paddle extends Rectangle implements Externalizable   {
     public Paddle(Paddle paddle) {
         this.setX(paddle.getX());
         this.setY(paddle.getY());
+        this.setWidth(paddle.getWidth());
+        this.setHeight(paddle.getHeight());
+        this.setFill(paddle.getFill());
         this.vy=paddle.vy;
     }
 

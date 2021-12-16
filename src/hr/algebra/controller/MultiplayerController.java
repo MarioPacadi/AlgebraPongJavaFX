@@ -361,9 +361,9 @@ public class MultiplayerController implements Initializable {
     private void clientInput() {
         ClientThread ct=new ClientThread("Client " + padL.getId());
         ct.start();
-        if (ct.getPaddle()!=null) {
-            padR.setY(ct.getPaddle().getY());
-        }      
+        if (ct.getY()!=null) {
+            padR.setY(ct.getY());
+        }
     }
     
 }

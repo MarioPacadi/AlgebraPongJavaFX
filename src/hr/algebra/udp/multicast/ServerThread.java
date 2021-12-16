@@ -25,10 +25,11 @@ import java.util.logging.Logger;
 public class ServerThread extends Thread {
 
     public static final int CLIENT_PORT = 4446;
+    public static final int BALL_PORT = 4448;
     // 224.0.0.0 to 239.255.255.255
     public static final String GROUP = "230.0.0.1";
     
-    private Paddle paddle=new Paddle();    
+    private Paddle paddle;    
 
     public ServerThread(Paddle paddle) {
         this.paddle=new Paddle(paddle);

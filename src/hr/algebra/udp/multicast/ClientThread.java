@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class ClientThread extends Thread {
 
     private final int bufferSize = 1024 * 4;
-    private Paddle paddle;
+    private static Double Y;
     
     public ClientThread(String name) {
         super(name);
@@ -53,7 +53,7 @@ public class ClientThread extends Thread {
                 Object readObject = ois.readObject();
                 if (readObject instanceof Paddle) {
                     Paddle pad = (Paddle) readObject;
-                    paddle=new Paddle(pad);
+                    Y=pad.getY();
                     System.out.println("Message is: " + pad);
                 } else {
                     System.out.println("The received object is not of type Paddle!");
@@ -70,8 +70,8 @@ public class ClientThread extends Thread {
         }
     }
 
-    public Paddle getPaddle() {
-        return paddle;
-    }   
+    public Double getY() {
+        return Y;
+    }
     
 }
