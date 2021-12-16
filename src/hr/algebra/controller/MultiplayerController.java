@@ -11,6 +11,9 @@ import hr.algebra.model.Paddle;
 import hr.algebra.model.helper.FileName;
 import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
+import hr.algebra.tcp.PaddleThread;
+import hr.algebra.udp.multicast.ClientThread;
+import hr.algebra.udp.multicast.ServerThread;
 import hr.algebra.utilities.AlertUtils;
 import hr.algebra.utilities.ReflectionUtils;
 import hr.algebra.utilities.SerializationUtils;
@@ -69,10 +72,11 @@ public class MultiplayerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
        game=new GameStat(ball.getCenterX(),ball.getCenterY());
-
+        
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
                 checkInput();
+                clientInput();
                 //physics updates
                 padL.updatePosition();
                 padR.updatePosition();                
@@ -142,12 +146,13 @@ public class MultiplayerController implements Initializable {
     private void checkInput() {
         // left paddle
         if (MovementHandler.isDownPressedL() && !MovementHandler.isUpPressedL()) {
-            padL.moveDownward();
+            padL.moveDownward();            
         } else if (MovementHandler.isUpPressedL() && !MovementHandler.isDownPressedL()) {
             padL.moveUpward();
         } else {
             padL.slowDown();
         }
+        new ServerThread(padL).start();      
 
         // right paddle
         if (MovementHandler.isDownPressedR() && !MovementHandler.isUpPressedR()) {
@@ -202,7 +207,7 @@ public class MultiplayerController implements Initializable {
     
     private boolean checkScore(Label label) 
     { 
-        return MAX_SCORE<=Integer.parseInt(GetScore(label));    
+        return Integer.parseInt(GetScore(label))>=MAX_SCORE;    
     }
 
     private String GetScore(Label label) {
@@ -352,5 +357,13 @@ public class MultiplayerController implements Initializable {
         lbPause.setVisible(pauseActive);
     }
     // </editor-fold> 
+
+    private void clientInput() {
+        ClientThread ct=new ClientThread("Client " + padL.getId());
+        ct.start();
+        if (ct.getPaddle()!=null) {
+            padR.setY(ct.getPaddle().getY());
+        }      
+    }
     
 }

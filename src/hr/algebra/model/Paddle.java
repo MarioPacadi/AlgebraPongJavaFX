@@ -5,14 +5,14 @@
  */
 package hr.algebra.model;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import javafx.scene.shape.Rectangle;
 
-//DODAJ implements Externalizable 
-public class Paddle extends Rectangle implements Serializable   {
+
+public class Paddle extends Rectangle implements Externalizable   {
     
     private static final long serialVersionUID = 2L;
     
@@ -22,6 +22,12 @@ public class Paddle extends Rectangle implements Serializable   {
     private static final double ACCELERATION = 5;
 
     public Paddle(){}   
+
+    public Paddle(Paddle paddle) {
+        this.setX(paddle.getX());
+        this.setY(paddle.getY());
+        this.vy=paddle.vy;
+    }
 
     public void updatePosition(){
         this.setY(this.getY() + vy);
@@ -56,16 +62,17 @@ public class Paddle extends Rectangle implements Serializable   {
             vy = 0;
         }
     }
-    
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.defaultWriteObject();
-        oos.writeUTF(Double.toString(this.getX()));
-        oos.writeUTF(Double.toString(this.getY()));
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeDouble(this.getX());
+        out.writeDouble(this.getY());
     }
 
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        ois.defaultReadObject();
-        this.setX(Double.parseDouble(ois.readUTF()));
-        this.setY(Double.parseDouble(ois.readUTF()));
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.setX(in.readDouble());
+        this.setY(in.readDouble());
     }
+    
 }

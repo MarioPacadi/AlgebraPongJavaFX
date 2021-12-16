@@ -3,7 +3,7 @@ package hr.algebra.model
 
 public Ball
 extends javafx.scene.shape.Circle javafx.scene.shape.Shape javafx.scene.Node java.lang.Object
-implements java.io.Serializable
+implements java.io.Externalizable
 
 private static final long hr.algebra.model.Ball.serialVersionUID
 private final double hr.algebra.model.Ball.BALL_ACCELERATION
@@ -15,10 +15,10 @@ private int hr.algebra.model.Ball.dy
 public class java.lang.String toString()
 
 
-private void readObject(java.io.ObjectInputStream arg0) throws java.io.IOException java.lang.ClassNotFoundException
+public void readExternal(java.io.ObjectInput arg0) throws java.io.IOException java.lang.ClassNotFoundException
 
 
-private void writeObject(java.io.ObjectOutputStream arg0) throws java.io.IOException
+public void writeExternal(java.io.ObjectOutput arg0) throws java.io.IOException
 
 
 public void moveBall(javafx.scene.layout.Pane arg0)
@@ -33,13 +33,13 @@ public int getDx()
 public int getDy()
 
 
-public void setDy(int arg0)
+public void setDx(int arg0)
 
 
 public void setHit(int arg0)
 
 
-public void setDx(int arg0)
+public void setDy(int arg0)
 
 
 public double getBALL_ACCELERATION()
@@ -52,7 +52,7 @@ package hr.algebra.model
 
 public Paddle
 extends javafx.scene.shape.Rectangle javafx.scene.shape.Shape javafx.scene.Node java.lang.Object
-implements java.io.Serializable
+implements java.io.Externalizable
 
 private static final long hr.algebra.model.Paddle.serialVersionUID
 public double hr.algebra.model.Paddle.vy
@@ -61,102 +61,26 @@ private static final double hr.algebra.model.Paddle.STOP_SPEED
 private static final double hr.algebra.model.Paddle.ACCELERATION
 
 
-private void readObject(java.io.ObjectInputStream arg0) throws java.io.IOException java.lang.ClassNotFoundException
+public void readExternal(java.io.ObjectInput arg0) throws java.io.IOException java.lang.ClassNotFoundException
 
 
-private void writeObject(java.io.ObjectOutputStream arg0) throws java.io.IOException
-
-
-public void moveUpward()
+public void writeExternal(java.io.ObjectOutput arg0) throws java.io.IOException
 
 
 public void updatePosition()
 
 
-public void slowDown()
-
-
 public void moveDownward()
+
+
+public void moveUpward()
+
+
+public void slowDown()
 
 
 public hr.algebra.model.Paddle()
 
-Pong
-package hr.algebra.model
 
-public abstract Pong
-extends java.lang.Object
-
-public hr.algebra.serializable.GameStat hr.algebra.model.Pong.game
-public javafx.animation.Timeline hr.algebra.model.Pong.timeline
-public javafx.scene.layout.Pane hr.algebra.model.Pong.PlayingField
-public hr.algebra.model.Ball hr.algebra.model.Pong.ball
-public hr.algebra.model.Paddle hr.algebra.model.Pong.padL
-public hr.algebra.model.Paddle hr.algebra.model.Pong.padR
-public javafx.scene.control.Label hr.algebra.model.Pong.lbPause
-public javafx.scene.control.Label hr.algebra.model.Pong.lbLeft
-public javafx.scene.control.Label hr.algebra.model.Pong.lbRight
-
-
-public void onKeyPressed(javafx.scene.input.KeyEvent arg0)
-
-
-private void PaddleBoundary(hr.algebra.model.Paddle arg0)
-
-
-private void ChangeScore()
-
-
-public void checkGameBounds()
-
-
-public void SetGameplaySpeed(int arg0)
-
-
-public void SetScore(javafx.scene.control.Label arg0, java.lang.Integer arg1)
-
-
-public void SetupDefaultBall()
-
-
-private boolean PaddelContact(hr.algebra.model.Paddle arg0)
-
-
-public void SetupCustomBall(hr.algebra.model.Ball arg0)
-
-
-public void SetupPaddle(hr.algebra.model.Paddle arg0, hr.algebra.model.Paddle arg1)
-
-
-public class java.lang.String GetScore(javafx.scene.control.Label arg0)
-
-
-public void SetupGameStats(hr.algebra.serializable.GameStat arg0)
-
-
-private void checkPaddle(hr.algebra.model.Paddle arg0)
-
-
-public abstract void checkInput()
-
-
-public void LoadFile(java.lang.Object arg0, java.lang.String arg1) throws java.lang.ClassNotFoundException java.io.IOException
-
-
-public abstract void SetListeners()
-
-
-public abstract void SaveFiles()
-
-
-public void FillGameStats()
-
-
-public abstract void DetectSaveDataFile()
-
-
-public int GenRandomDirection()
-
-
-public hr.algebra.model.Pong()
+public hr.algebra.model.Paddle(hr.algebra.model.Paddle arg0)
 

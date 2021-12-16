@@ -5,10 +5,10 @@
  */
 package hr.algebra.model;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
@@ -16,7 +16,7 @@ import javafx.scene.shape.Circle;
  *
  * @author Mario
  */
-public class Ball extends Circle implements Serializable  {
+public class Ball extends Circle implements Externalizable {
 
     private static final long serialVersionUID = 1L;
     
@@ -48,17 +48,17 @@ public class Ball extends Circle implements Serializable  {
         this.setCenterY(y);
     }
     
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.defaultWriteObject();
-        oos.writeUTF(Double.toString(this.getCenterX()));
-        oos.writeUTF(Double.toString(this.getCenterY()));
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeDouble(this.getCenterX());
+        out.writeDouble(this.getCenterY());
     }
 
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        ois.defaultReadObject();
-        this.setCenterX(Double.parseDouble(ois.readUTF()));
-        this.setCenterY(Double.parseDouble(ois.readUTF()));
-    }
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.setCenterX(in.readDouble());
+        this.setCenterY(in.readDouble());
+    }    
     
     //Getter and setter
     public int getHit() {
@@ -92,14 +92,11 @@ public class Ball extends Circle implements Serializable  {
     @Override
     public String toString() {
         StringBuilder sb=new StringBuilder();
-        sb.append("CentarX = ").append(this.getCenterX()).append("\n");
+        sb.append("CentarX = ").append(this.getCenterX()).append(" ");
         sb.append("CentarY = ").append(this.getCenterY()).append("\n");
-        sb.append("dx = ").append(this.dx).append("\n");
+        sb.append("dx = ").append(this.dx).append(" ");
         sb.append("dy = ").append(this.dy).append("\n");
         
         return sb.toString();
-    }
-    
-    
-    
+    }    
 }
