@@ -8,26 +8,13 @@ package hr.algebra.controller;
 import hr.algebra.handler.MovementHandler;
 import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
-import hr.algebra.model.helper.FileName;
 import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
-import hr.algebra.tcp.PaddleThread;
 import hr.algebra.udp.multicast.ClientThread;
 import hr.algebra.udp.multicast.ServerThread;
-import hr.algebra.utilities.AlertUtils;
-import hr.algebra.utilities.ReflectionUtils;
-import hr.algebra.utilities.SerializationUtils;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -46,7 +33,9 @@ import javafx.util.Duration;
  */
 public class MultiplayerController implements Initializable {
 
-    // <editor-fold defaultstate="collapsed" desc="Variables">   
+    // <editor-fold defaultstate="collapsed" desc="Variables">
+    public int POSITION=-1;
+    
     private GameStat game;
     private Timeline timeline;
     private static final int MAX_SCORE=5;
@@ -76,7 +65,6 @@ public class MultiplayerController implements Initializable {
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
                 checkInput();
-                clientInput();
                 //physics updates
                 padL.updatePosition();
                 padR.updatePosition();                
@@ -85,7 +73,6 @@ public class MultiplayerController implements Initializable {
                 checkGameBounds();
         }));
         
-        DetectSaveDataFile();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
         SetGameplaySpeed(GameStat.GAME_SPEED);
@@ -144,23 +131,49 @@ public class MultiplayerController implements Initializable {
 
     //<editor-fold defaultstate="collapsed" desc="Inputs and bot">
     private void checkInput() {
-        // left paddle
+        switch (POSITION) {
+            case 0:
+                enabledLeft();
+                clientInput(padL,padR);
+                break;
+            case 1:
+                enabledRight();
+                clientInput(padR,padL);
+                break;
+            default:
+                lbPause.setText("Non-existant \n position!");
+                pauseGame();
+                break;
+        }
+    }
+    
+    private void enabledLeft() {
         if (MovementHandler.isDownPressedL() && !MovementHandler.isUpPressedL()) {
-            padL.moveDownward();            
+            padL.moveDownward();
         } else if (MovementHandler.isUpPressedL() && !MovementHandler.isDownPressedL()) {
             padL.moveUpward();
         } else {
             padL.slowDown();
         }
-        new ServerThread(padL).start();      
+        new ServerThread(padL).start();  
+    }
 
-        // right paddle
+    private void enabledRight() {
         if (MovementHandler.isDownPressedR() && !MovementHandler.isUpPressedR()) {
             padR.moveDownward();
         } else if (MovementHandler.isUpPressedR() && !MovementHandler.isDownPressedR()) {
             padR.moveUpward();
         } else {
             padR.slowDown();
+        }
+        new ServerThread(padR).start();  
+    }
+    
+    private void clientInput(Paddle padSend, Paddle padChange) {
+        ClientThread ct = new ClientThread("Client " + padSend.getId());
+        ct.start();
+        if (ct.getY() != null) {
+            padChange.setY(ct.getY());
         }
     }
 
@@ -246,71 +259,11 @@ public class MultiplayerController implements Initializable {
         SetScore(lbLeft, Integer.parseInt(gameStat.getLeftScore()));
         SetScore(lbRight, Integer.parseInt(gameStat.getRightScore()));
     }
-    // </editor-fold> 
 
-    //<editor-fold defaultstate="collapsed" desc="Serialization">
-    private void DetectSaveDataFile() {
-        if (FileName.CheckFileExistance() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
-            LoadFile(ball, FileName.BALL.toString());
-            LoadFile(padL, FileName.LEFT_RECTANGLE.toString());
-            LoadFile(padR, FileName.RIGHT_RECTANGLE.toString());
-            LoadFile(game, FileName.GAMESTAT.toString());
-        } else {
-            SetupDefaultBall();
-        }
+    public void setPOSITION(int POSITION) {
+        this.POSITION = POSITION;
     }
-
-    private void LoadFile(Object object, String file_name) {
-        try {
-            Class<?> clazz = Class.forName(object.getClass().getName());
-            Object ser_obj = (Object) SerializationUtils.read(file_name);
-
-            switch (ser_obj.getClass().getSimpleName()) {
-                case "Ball":
-                    SetupCustomBall((Ball) ser_obj);
-                    break;
-                case "Paddle":
-                    SetupPaddle((Paddle) object, (Paddle) ser_obj);
-                    break;
-                case "GameStat":
-                    SetupGameStats((GameStat) ser_obj);
-                    break;
-                default:
-                    throw new AssertionError();
-            }
-
-            //Ball.class.getSimpleName()
-//            switch (ser_obj) {
-//                case Ball ball -> SetupCustomBall(ball);
-//                case Paddle paddle -> ChangePaddle(padL,paddle);
-//                default -> throw new AssertionError();
-//            }
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void SaveFiles() {
-        try {
-            timeline.stop();
-            if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
-                SerializationUtils.write(ball, FileName.BALL.toString());
-                SerializationUtils.write(padL, FileName.LEFT_RECTANGLE.toString());
-                SerializationUtils.write(padR, FileName.RIGHT_RECTANGLE.toString());
-                FillGameStats();
-                SerializationUtils.write(game, FileName.GAMESTAT.toString());
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(SingleplayerController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void FillGameStats() {
-        game.setGameSpeedRate(timeline.getRate());
-        game.setLeftScore(GetScore(lbLeft));
-        game.setRightScore(GetScore(lbRight));
-    }
-    // </editor-fold> 
+    // </editor-fold>  
 
     //<editor-fold defaultstate="collapsed" desc="Listeners">
     private void SetListeners() {
@@ -323,7 +276,7 @@ public class MultiplayerController implements Initializable {
                         // stage is set. now is the right time to do whatever we need to the stage in the controller.
                         Stage stage = (Stage) newWindow;
                         stage.setOnCloseRequest(e -> {
-                            SaveFiles();
+                            
                             Platform.exit();
                         });
                         stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> onKeyPressed(event));
@@ -357,13 +310,6 @@ public class MultiplayerController implements Initializable {
         lbPause.setVisible(pauseActive);
     }
     // </editor-fold> 
-
-    private void clientInput() {
-        ClientThread ct=new ClientThread("Client " + padL.getId());
-        ct.start();
-        if (ct.getY()!=null) {
-            padR.setY(ct.getY());
-        }
-    }
+    
     
 }

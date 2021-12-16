@@ -7,8 +7,6 @@ package hr.algebra.controller;
 
 import hr.algebra.resources.BallPane;
 import hr.algebra.handler.MovementHandler;
-import hr.algebra.tcp.Server;
-import hr.algebra.udp.multicast.ServerThread;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -31,6 +29,7 @@ public class GameUIController implements Initializable {
     
     private static final String SINGLEPLAYER_PATH="/hr/algebra/view/Singleplayer.fxml";
     private static final String MULTIPLAYER_PATH="/hr/algebra/view/Multiplayer.fxml";
+    private static final String POSITION_PATH = "/hr/algebra/view/ChoosePosition.fxml"; 
     
     @FXML
     private AnchorPane mainPane;
@@ -44,23 +43,23 @@ public class GameUIController implements Initializable {
     }
     
     @FXML
-    private void btnSinglePlayerClick()
-    {
-        OpenWindow(SINGLEPLAYER_PATH);
+    private void btnSinglePlayerClick() {
+        ChangeCurrentWindow(SINGLEPLAYER_PATH);
     } 
     
     @FXML
     private void btnMultiPlayerClick() {
-        OpenWindow(MULTIPLAYER_PATH);
+        //Choose left or right
+        //ChangeCurrentWindow(MULTIPLAYER_PATH);
+        ChangeCurrentWindow(POSITION_PATH);
     }
     
     @FXML
-    private void btnExitClick()
-    {
+    private void btnExitClick() {
         Platform.exit();
     }
 
-    private void OpenWindow(String path) {
+    private void ChangeCurrentWindow(String path) {
         Stage stage = (Stage) mainPane.getScene().getWindow();
         try {
             start(stage, path);

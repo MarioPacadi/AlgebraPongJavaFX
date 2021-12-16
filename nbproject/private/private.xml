@@ -4,13 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/udp/multicast/ClientThread.java</file>
-            <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/udp/multicast/Receiver.java</file>
             <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/udp/multicast/ServerThread.java</file>
+            <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/controller/ChoosePositionController.java</file>
             <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/controller/MultiplayerController.java</file>
             <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/controller/GameUIController.java</file>
-            <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/udp/multicast/Sender.java</file>
             <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/model/Paddle.java</file>
-            <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/view/Multiplayer.fxml</file>
+            <file>file:/D:/Faks_algebra/Priprema%20za%20meduispit/Programiranje%20u%20Javi/Programiranje%20iz%20Jave%202/AlgebraPongJavaFX/src/hr/algebra/view/ChoosePosition.fxml</file>
         </group>
     </open-files>
 </project-private>
