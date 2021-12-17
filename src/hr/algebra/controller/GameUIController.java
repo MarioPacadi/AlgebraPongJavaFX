@@ -50,7 +50,6 @@ public class GameUIController implements Initializable {
     @FXML
     private void btnMultiPlayerClick() {
         //Choose left or right
-        //ChangeCurrentWindow(MULTIPLAYER_PATH);
         ChangeCurrentWindow(POSITION_PATH);
     }
     

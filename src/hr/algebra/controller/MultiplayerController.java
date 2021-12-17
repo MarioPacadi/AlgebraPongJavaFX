@@ -17,7 +17,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -275,9 +274,8 @@ public class MultiplayerController implements Initializable {
                     if (oldWindow == null && newWindow != null) {
                         // stage is set. now is the right time to do whatever we need to the stage in the controller.
                         Stage stage = (Stage) newWindow;
-                        stage.setOnCloseRequest(e -> {
-                            
-                            Platform.exit();
+                        stage.setOnCloseRequest(e -> {                           
+                            System.exit(0);
                         });
                         stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> onKeyPressed(event));
                     }

@@ -17,6 +17,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 /**
@@ -30,6 +32,12 @@ public class ChoosePositionController implements Initializable {
     
     @FXML
     private Label lbChoice;
+    @FXML
+    private GridPane positionPane;
+    @FXML
+    private Label lbPause;
+    @FXML
+    private Pane waitingPane;
 
     /**
      * Initializes the controller class.
@@ -41,12 +49,14 @@ public class ChoosePositionController implements Initializable {
 
     @FXML
     private void leftPlayer(ActionEvent event) {
-        ChangeCurrentWindow(MULTIPLAYER_PATH, 0);
+        pauseGame();
+        //ChangeCurrentWindow(MULTIPLAYER_PATH, 0);
     }
 
     @FXML
     private void rightPlayer(ActionEvent event) {
-        ChangeCurrentWindow(MULTIPLAYER_PATH, 1);
+        pauseGame();
+        //ChangeCurrentWindow(MULTIPLAYER_PATH, 1);
     }
     
     private void ChangeCurrentWindow(String path, int pos) {
@@ -69,9 +79,20 @@ public class ChoosePositionController implements Initializable {
             scene.setOnKeyPressed(MovementHandler.getMove());
             scene.setOnKeyReleased(MovementHandler.getStand());
             window.setScene(scene);
-            window.show();
+            //window.show();            
         }
         else System.out.println("Error choosen position out of scope");
+    }
+    
+    private void pauseGame() {
+        boolean pauseActive = !waitingPane.visibleProperty().get();
+        if (pauseActive) {
+            positionPane.setOpacity(0.5);
+        } else {
+            positionPane.setOpacity(1);
+        }
+        waitingPane.setVisible(pauseActive);
+        waitingPane.setDisable(!pauseActive);
     }
     
 }
