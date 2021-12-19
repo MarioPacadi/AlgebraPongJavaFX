@@ -5,6 +5,8 @@
  */
 package hr.algebra.controller;
 
+import hr.algebra.PongApplication;
+import static hr.algebra.PongApplication.ICON;
 import hr.algebra.resources.BallPane;
 import hr.algebra.handler.MovementHandler;
 import java.net.URL;
@@ -17,6 +19,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 

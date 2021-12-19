@@ -65,18 +65,18 @@ public class ServerThread extends Thread {
                 }
 
                 //Send data
-                try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-                    
-                    oos.writeObject(PADDLE);
-                    buffer = baos.toByteArray();
-                    packet = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
-                    serverSocket.send(packet);
-                } catch (IOException e) {
-                    System.err.println("No object could be writen from the received UDP datagram.");
-                }
+//                try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                    ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+//                    
+//                    oos.writeObject(PADDLE);
+//                    buffer = baos.toByteArray();
+//                    packet = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
+//                    serverSocket.send(packet);
+//                } catch (IOException e) {
+//                    System.err.println("No object could be writen from the received UDP datagram.");
+//                }
                 
-                Thread.sleep(50);
+                Thread.sleep(25);
 
             } catch (SocketException ex) {
                 Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -85,13 +85,13 @@ public class ServerThread extends Thread {
             }
         }        
     }
-    
-    public Paddle getPADDLE() {
-        return PADDLE;
-    }
 
     public double getY() {
         return PADDLE.getY();
+    }
+    
+    public Paddle getPADDLE() {
+        return PADDLE;
     }
 
     public void setPADDLE(Paddle PADDLE) {

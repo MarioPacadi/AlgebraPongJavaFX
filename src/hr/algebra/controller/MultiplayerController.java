@@ -42,8 +42,11 @@ public class MultiplayerController implements Initializable {
     private Timeline timeline;
     private static final int MAX_SCORE=5;
     
-    private ServerThread server;
-    private ClientThread client;
+    private ServerThread serverR;
+    private ClientThread clientR;
+    
+    private ServerThread serverL;
+    private ClientThread clientL;
 
     @FXML
     private Pane PlayingField;
@@ -68,8 +71,10 @@ public class MultiplayerController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
        game=new GameStat(ball.getCenterX(),ball.getCenterY());
         
-       server=new ServerThread(padL);
-       client=new ClientThread(padR);
+       serverR=new ServerThread(padL);
+       clientR=new ClientThread(padR);
+       serverL = new ServerThread(padR);
+       clientL = new ClientThread(padL);
        Platform.runLater(()->StartThreads());
        
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
@@ -144,15 +149,16 @@ public class MultiplayerController implements Initializable {
         switch (POSITION) {
             case 0:
                 enabledLeft();  
-                server=new ServerThread(padL);
-                serverInput();              
-                //new ServerPaddleThread(padR).start();
+                //server.setPADDLE(padL);
+                //serverInput();
+                networkInput(padR, serverR);
                 break;
             case 1:
                 enabledRight();
-                client = new ClientThread(padR);
-                clientInput();                
-                //clientInput(padL,padR, ServerPaddleThread.CLIENT_PORT);
+                clientR.setPADDLE(padR);
+                
+                //networkInput(padL, client);
+                //clientInput();                
                 break;
             default:
                 lbPause.setText("Non-existant \n position!");
@@ -203,10 +209,10 @@ public class MultiplayerController implements Initializable {
         System.out.println(POSITION);
         switch (POSITION) {
             case 0:
-                server.start();     
+                serverR.start();
                 break;
             case 1:
-                client.start();
+                clientR.start();
                 break;
             default:
                 lbPause.setText("Non-existant \n position!");
@@ -216,13 +222,27 @@ public class MultiplayerController implements Initializable {
     }
     
     private void serverInput() {
-        //System.out.println("INPUT SERVER");
-        padR.setY(server.getY());
+        padR.setY(serverR.getY());
     }
     
     private void clientInput() {
-        //System.out.println("INPUT CLIENT");
-        padL.setY(client.getY());     
+        padL.setY(clientR.getY());     
+    }
+    
+    private void networkInput(Paddle changepad,Thread net) {
+        switch (net.getClass().getSimpleName()) {
+            case "ServerThread":
+                changepad.setY(((ServerThread)net).getY());
+                break;
+            case "ClientThread":
+                changepad.setY(((ClientThread)net).getY());
+                break;
+            default:
+                System.out.println("Network thread isnt instanceof scope");
+        }
+//        if (net instanceof ServerThread || net instanceof ClientThread) {
+//            pad.setY(net.getY());
+//        }     
     }
 
     //Ova funkcija se konstantno delete-a 

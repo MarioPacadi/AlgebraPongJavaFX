@@ -39,36 +39,42 @@ public class ClientThread extends Thread {
                 byte[] buffer=new byte[MIN_PRIORITY];
                 try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+                    //Send data
                     oos.writeObject(PADDLE);
                     buffer = baos.toByteArray();
+                    
+                    //Client info
                     InetAddress serverAddress = InetAddress.getByName(ServerThread.HOST);
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, ServerThread.SERVER_PORT);
+                    int serverPort = packet.getPort();
+                    System.out.println("Client sent message from " + serverAddress + ":" + serverPort);
+                    
                     clientSocket.send(packet);
                     
-                    buffer = new byte[ServerThread.BUFSIZE];
-                    packet = new DatagramPacket(buffer, buffer.length);
-                    clientSocket.receive(packet);
+//                    System.err.println("Client listening on port: " + clientSocket.getLocalPort());
+//                    buffer = new byte[ServerThread.BUFSIZE];
+//                    packet = new DatagramPacket(buffer, buffer.length);
+//                    clientSocket.receive(packet);
                 } catch (Exception e) {
+                    System.out.println("Client wasnt able to send packet to server!");
                 }
 
                 //Display response
-                try(ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-                    ObjectInputStream ois = new ObjectInputStream(bais)) {
-                    
-                    Object readObject = ois.readObject();
-                    if (readObject instanceof Paddle) {
-                        Paddle pad = (Paddle) readObject;
-                        PADDLE.setY(pad.getY());
-                    } else {
-                        System.err.println("The received object is not of type Paddle!");
-                    }
-                } catch (ClassNotFoundException e) {
-                    System.err.println("No object could be read from the received UDP datagram.");
-                }
+//                try(ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+//                    ObjectInputStream ois = new ObjectInputStream(bais)) {
+//                    
+//                    Object readObject = ois.readObject();
+//                    if (readObject instanceof Paddle) {
+//                        Paddle pad = (Paddle) readObject;
+//                        PADDLE.setY(pad.getY());
+//                    } else {
+//                        System.err.println("The received object is not of type Paddle!");
+//                    }
+//                } catch (ClassNotFoundException e) {
+//                    System.err.println("No object could be read from the received UDP datagram.");
+//                }
 
-                Thread.sleep(50);
-            } catch (SocketException | UnknownHostException ex) {
-                Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
+                Thread.sleep(25);
             } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
             }
