@@ -6,7 +6,6 @@
 package hr.algebra.udp.unicast;
 
 import hr.algebra.model.Paddle;
-import static hr.algebra.udp.unicast.ServerThread.BUFSIZE;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,23 +36,25 @@ public class ClientThread extends Thread {
         while (true) {
             try (DatagramSocket clientSocket = new DatagramSocket()) {
                 //Send data
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(PADDLE);
-                byte[] buffer = baos.toByteArray();
-                InetAddress serverAddress = InetAddress.getByName(ServerThread.HOST);
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, ServerThread.SERVER_PORT);
-                clientSocket.send(packet);
-
-                //Receive data
-                buffer = new byte[ServerThread.BUFSIZE];
-                packet = new DatagramPacket(buffer, buffer.length);
-                clientSocket.receive(packet);
+                byte[] buffer=new byte[MIN_PRIORITY];
+                try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+                    oos.writeObject(PADDLE);
+                    buffer = baos.toByteArray();
+                    InetAddress serverAddress = InetAddress.getByName(ServerThread.HOST);
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, ServerThread.SERVER_PORT);
+                    clientSocket.send(packet);
+                    
+                    buffer = new byte[ServerThread.BUFSIZE];
+                    packet = new DatagramPacket(buffer, buffer.length);
+                    clientSocket.receive(packet);
+                } catch (Exception e) {
+                }
 
                 //Display response
-                ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-                ObjectInputStream ois = new ObjectInputStream(bais);
-                try {
+                try(ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+                    ObjectInputStream ois = new ObjectInputStream(bais)) {
+                    
                     Object readObject = ois.readObject();
                     if (readObject instanceof Paddle) {
                         Paddle pad = (Paddle) readObject;
@@ -65,10 +66,10 @@ public class ClientThread extends Thread {
                     System.err.println("No object could be read from the received UDP datagram.");
                 }
 
-                //Thread.sleep(6000);
+                Thread.sleep(50);
             } catch (SocketException | UnknownHostException ex) {
                 Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
+            } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }       

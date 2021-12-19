@@ -79,11 +79,11 @@ public class ServerPaddleThread extends Thread {
             //String received = new String(packet.getData());
             //System.out.println("Quote of the Moment: " + received);            
 
-            Thread.sleep(6000);
+            //Thread.sleep(6000);
 
         } catch (SocketException ex) {
             Logger.getLogger(ServerPaddleThread.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | InterruptedException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(ServerPaddleThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

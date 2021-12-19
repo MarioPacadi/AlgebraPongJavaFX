@@ -59,7 +59,7 @@ public class ChoosePositionController implements Initializable {
         pauseGame();
         server.start();
         try {
-            server.join(5000);
+            server.join(2000);
             ifConnectedStart("GAME START LEFT", 0);
         } catch (InterruptedException ex) {
             Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);
@@ -72,7 +72,7 @@ public class ChoosePositionController implements Initializable {
         pauseGame();
         client.start();
         try {
-            client.join(5000);
+            client.join(2000);
             ifConnectedStart("GAME START RIGHT", 1);
         } catch (InterruptedException ex) {
             Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);

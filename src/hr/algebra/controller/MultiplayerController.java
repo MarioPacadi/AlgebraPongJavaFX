@@ -19,6 +19,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -69,6 +70,7 @@ public class MultiplayerController implements Initializable {
         
        server=new ServerThread(padL);
        client=new ClientThread(padR);
+       Platform.runLater(()->StartThreads());
        
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
@@ -141,13 +143,15 @@ public class MultiplayerController implements Initializable {
     private void checkInput() {
         switch (POSITION) {
             case 0:
-                enabledLeft();                
-                serverInput();
+                enabledLeft();  
+                server=new ServerThread(padL);
+                serverInput();              
                 //new ServerPaddleThread(padR).start();
                 break;
             case 1:
                 enabledRight();
-                clientInput();
+                client = new ClientThread(padR);
+                clientInput();                
                 //clientInput(padL,padR, ServerPaddleThread.CLIENT_PORT);
                 break;
             default:
@@ -196,6 +200,7 @@ public class MultiplayerController implements Initializable {
     }
     
     private void StartThreads(){
+        System.out.println(POSITION);
         switch (POSITION) {
             case 0:
                 server.start();     
@@ -211,13 +216,13 @@ public class MultiplayerController implements Initializable {
     }
     
     private void serverInput() {
-        padR.setY(client.getY());
-        System.out.println("INPUT SERVER");  
+        //System.out.println("INPUT SERVER");
+        padR.setY(server.getY());
     }
     
     private void clientInput() {
-        padL.setY(server.getY());
-        System.out.println("INPUT CLIENT");
+        //System.out.println("INPUT CLIENT");
+        padL.setY(client.getY());     
     }
 
     //Ova funkcija se konstantno delete-a 
@@ -279,8 +284,11 @@ public class MultiplayerController implements Initializable {
 
     //<editor-fold defaultstate="collapsed" desc="Setup Components">
     private void SetupDefaultBall() {
-        ball.setDx(GenRandomDirection());
-        ball.setDy(GenRandomDirection());
+          ball.setDx(-1);
+          ball.setDy(-1);
+//        ball.setDx(GenRandomDirection());
+//        ball.setDy(GenRandomDirection());
+
     }
 
     private void SetupCustomBall(Ball customBall) {

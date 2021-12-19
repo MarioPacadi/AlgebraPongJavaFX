@@ -93,6 +93,7 @@ public class GameUIController implements Initializable {
         Stage newWindow = new Stage();
         newWindow.setTitle("Client App");
         newWindow.setScene(scene);
+        newWindow.setOnCloseRequest(e -> System.exit(0));
         //window.setResizable(true);
         newWindow.show();
     }

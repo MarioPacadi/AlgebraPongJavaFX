@@ -15,9 +15,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,9 +50,9 @@ public class ServerThread extends Thread {
                 System.out.println("Server received message from " + clientAddress + ":" + clientPort);
 
                 //Display response
-                ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-                ObjectInputStream ois = new ObjectInputStream(bais);
-                try {
+                try(ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+                    ObjectInputStream ois = new ObjectInputStream(bais)) {
+                    
                     Object readObject = ois.readObject();
                     if (readObject instanceof Paddle) {
                         Paddle pad = (Paddle) readObject;
@@ -68,17 +65,22 @@ public class ServerThread extends Thread {
                 }
 
                 //Send data
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(PADDLE);
-                buffer = baos.toByteArray();
-                packet = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
-
-                serverSocket.send(packet);
+                try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+                    
+                    oos.writeObject(PADDLE);
+                    buffer = baos.toByteArray();
+                    packet = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
+                    serverSocket.send(packet);
+                } catch (IOException e) {
+                    System.err.println("No object could be writen from the received UDP datagram.");
+                }
+                
+                Thread.sleep(50);
 
             } catch (SocketException ex) {
                 Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
+            } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }        
