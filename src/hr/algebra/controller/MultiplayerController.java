@@ -10,8 +10,10 @@ import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
-import hr.algebra.udp.multicast.ClientThread;
-import hr.algebra.udp.multicast.ServerThread;
+import hr.algebra.udp.multicast.ClientPaddleThread;
+import hr.algebra.udp.multicast.ServerPaddleThread;
+import hr.algebra.udp.unicast.ClientThread;
+import hr.algebra.udp.unicast.ServerThread;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
@@ -38,6 +40,9 @@ public class MultiplayerController implements Initializable {
     private GameStat game;
     private Timeline timeline;
     private static final int MAX_SCORE=5;
+    
+    private ServerThread server;
+    private ClientThread client;
 
     @FXML
     private Pane PlayingField;
@@ -54,6 +59,7 @@ public class MultiplayerController implements Initializable {
 
     // </editor-fold>
 
+    //Sloziti ServerProjekt
     /**
      * Initializes the controller class.
      */
@@ -61,6 +67,9 @@ public class MultiplayerController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
        game=new GameStat(ball.getCenterX(),ball.getCenterY());
         
+       server=new ServerThread(padL);
+       client=new ClientThread(padR);
+       
         timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
                 //Input
                 checkInput();
@@ -132,12 +141,14 @@ public class MultiplayerController implements Initializable {
     private void checkInput() {
         switch (POSITION) {
             case 0:
-                enabledLeft();
-                clientInput(padL,padR);
+                enabledLeft();                
+                serverInput();
+                //new ServerPaddleThread(padR).start();
                 break;
             case 1:
                 enabledRight();
-                clientInput(padR,padL);
+                clientInput();
+                //clientInput(padL,padR, ServerPaddleThread.CLIENT_PORT);
                 break;
             default:
                 lbPause.setText("Non-existant \n position!");
@@ -154,7 +165,7 @@ public class MultiplayerController implements Initializable {
         } else {
             padL.slowDown();
         }
-        new ServerThread(padL).start();  
+        //new ServerPaddleThread(padL,POSITION,"230.0.0.2").start();  
     }
 
     private void enabledRight() {
@@ -165,15 +176,48 @@ public class MultiplayerController implements Initializable {
         } else {
             padR.slowDown();
         }
-        new ServerThread(padR).start();  
+        //new ServerPaddleThread(padR,POSITION,"230.0.0.1").start();  
     }
     
     private void clientInput(Paddle padSend, Paddle padChange) {
-        ClientThread ct = new ClientThread("Client " + padSend.getId());
-        ct.start();
-        if (ct.getY() != null) {
-            padChange.setY(ct.getY());
+        ClientPaddleThread cpt = new ClientPaddleThread("Client " + padSend.getId());
+        cpt.start();
+        if (cpt.getY() != null) {
+            padChange.setY(cpt.getY());
         }
+    }
+    
+    private void clientInput(Paddle padSend, Paddle padChange, int PORT) {
+        ClientPaddleThread cpt = new ClientPaddleThread("Client " + padSend.getId());
+        cpt.start();
+        if (cpt.getY() != null) {
+            padChange.setY(cpt.getY());
+        }
+    }
+    
+    private void StartThreads(){
+        switch (POSITION) {
+            case 0:
+                server.start();     
+                break;
+            case 1:
+                client.start();
+                break;
+            default:
+                lbPause.setText("Non-existant \n position!");
+                pauseGame();
+                break;
+        }
+    }
+    
+    private void serverInput() {
+        padR.setY(client.getY());
+        System.out.println("INPUT SERVER");  
+    }
+    
+    private void clientInput() {
+        padL.setY(server.getY());
+        System.out.println("INPUT CLIENT");
     }
 
     //Ova funkcija se konstantno delete-a 
@@ -308,6 +352,5 @@ public class MultiplayerController implements Initializable {
         lbPause.setVisible(pauseActive);
     }
     // </editor-fold> 
-    
-    
+  
 }

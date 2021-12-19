@@ -19,30 +19,31 @@ import java.util.logging.Logger;
  *
  * @author Atlas Comic
  */
-public class ClientThread extends Thread {
+public class ClientPaddleThread extends Thread {
 
     private final int bufferSize = 1024 * 4;
     private static Double Y;
+    private final int PORT=ServerPaddleThread.CLIENT_PORT;
     
-    public ClientThread(String name) {
+    public ClientPaddleThread(String name) {
         super(name);
-    }
+    }   
 
     @Override
     public void run() {
-        System.out.println("Wating for datagram to be received...");
+        //System.out.println("Wating for datagram to be received...");
         
-        try (MulticastSocket clientSocket = new MulticastSocket(ServerThread.CLIENT_PORT)) {
+        try (MulticastSocket clientSocket = new MulticastSocket(ServerPaddleThread.CLIENT_PORT)) {
 
-            InetAddress groupAddress = InetAddress.getByName(ServerThread.GROUP);
-            System.err.println(getName() + " joining group");
+            InetAddress groupAddress = InetAddress.getByName(ServerPaddleThread.GROUP);
+            //System.err.println(getName() + " joining group");
             clientSocket.joinGroup(groupAddress);
 
             //Create buffer
             byte[] buffer = new byte[bufferSize];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             clientSocket.receive(packet);
-            System.out.println("Datagram received!");
+            //System.out.println("Datagram received!");
 
             //Deserialze object
             ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
@@ -52,7 +53,7 @@ public class ClientThread extends Thread {
                 if (readObject instanceof Paddle) {
                     Paddle pad = (Paddle) readObject;
                     Y=pad.getY();
-                    System.out.println("Message is: " + pad);
+                    //System.out.println("Message is: " + pad);
                 } else {
                     System.out.println("The received object is not of type Paddle!");
                 }
@@ -60,11 +61,11 @@ public class ClientThread extends Thread {
                 System.out.println("No object could be read from the received UDP datagram.");
             }                   
 
-            System.err.println(getName() + " leaving group");
+            System.err.println(getName() + " leaving "+ ServerPaddleThread.GROUP +" group");
             clientSocket.leaveGroup(groupAddress);
 
         } catch (IOException ex) {
-            Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ClientPaddleThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

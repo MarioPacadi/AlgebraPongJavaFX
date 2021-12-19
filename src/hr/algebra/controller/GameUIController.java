@@ -51,6 +51,11 @@ public class GameUIController implements Initializable {
     private void btnMultiPlayerClick() {
         //Choose left or right
         ChangeCurrentWindow(POSITION_PATH);
+        try {
+            startNewWindow(POSITION_PATH);
+        } catch (Exception ex) {
+            System.out.println("New Window couldn't be started!");
+        }       
     }
     
     @FXML
@@ -61,14 +66,14 @@ public class GameUIController implements Initializable {
     private void ChangeCurrentWindow(String path) {
         Stage stage = (Stage) mainPane.getScene().getWindow();
         try {
-            start(stage, path);
+            startChange(stage, path);
         } catch (Exception ex) {
             Logger.getLogger(GameUIController.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Yellow");
     }
     
-    public void start(Stage window, String path) throws Exception {
+    public void startChange(Stage window, String path) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource(path));
         Scene scene = new Scene(root);
         scene.setOnKeyPressed(MovementHandler.getMove());
@@ -76,6 +81,20 @@ public class GameUIController implements Initializable {
         window.setScene(scene);
         //window.setResizable(true);
         window.show();
+    }
+    
+    public void startNewWindow(String path) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
+
+        Scene scene=new Scene(loader.load());
+        scene.setOnKeyPressed(MovementHandler.getMove());
+        scene.setOnKeyReleased(MovementHandler.getStand());
+        
+        Stage newWindow = new Stage();
+        newWindow.setTitle("Client App");
+        newWindow.setScene(scene);
+        //window.setResizable(true);
+        newWindow.show();
     }
     
 }

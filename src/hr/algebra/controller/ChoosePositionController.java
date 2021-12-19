@@ -6,10 +6,13 @@
 package hr.algebra.controller;
 
 import hr.algebra.handler.MovementHandler;
+import hr.algebra.tcp.TCP_ClientThread;
+import hr.algebra.tcp.TCP_ServerThread;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,24 +42,46 @@ public class ChoosePositionController implements Initializable {
     @FXML
     private Pane waitingPane;
 
+    private TCP_ServerThread server;
+    private TCP_ClientThread client;
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
+        server=new TCP_ServerThread();
+        client=new TCP_ClientThread();
     }    
 
     @FXML
     private void leftPlayer(ActionEvent event) {
         pauseGame();
-        //ChangeCurrentWindow(MULTIPLAYER_PATH, 0);
+        server.start();
+        try {
+            server.join(5000);
+            ifConnectedStart("GAME START LEFT", 0);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //ifConnectedStart("GAME START LEFT", 0);         
     }
 
     @FXML
     private void rightPlayer(ActionEvent event) {
         pauseGame();
-        //ChangeCurrentWindow(MULTIPLAYER_PATH, 1);
+        client.start();
+        try {
+            client.join(5000);
+            ifConnectedStart("GAME START RIGHT", 1);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void ifConnectedStart(String message, int pos) {
+        System.out.println(message);
+        ChangeCurrentWindow(MULTIPLAYER_PATH, pos);
     }
     
     private void ChangeCurrentWindow(String path, int pos) {
@@ -79,7 +104,7 @@ public class ChoosePositionController implements Initializable {
             scene.setOnKeyPressed(MovementHandler.getMove());
             scene.setOnKeyReleased(MovementHandler.getStand());
             window.setScene(scene);
-            //window.show();            
+            window.show();            
         }
         else System.out.println("Error choosen position out of scope");
     }
