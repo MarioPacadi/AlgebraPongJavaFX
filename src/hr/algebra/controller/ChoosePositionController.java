@@ -63,8 +63,8 @@ public class ChoosePositionController implements Initializable {
             ifConnectedStart("GAME START LEFT", 0);
         } catch (InterruptedException ex) {
             Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        //ifConnectedStart("GAME START LEFT", 0);         
+            pauseGame();
+        }        
     }
 
     @FXML
@@ -76,6 +76,7 @@ public class ChoosePositionController implements Initializable {
             ifConnectedStart("GAME START RIGHT", 1);
         } catch (InterruptedException ex) {
             Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);
+            pauseGame();
         }
     }
     

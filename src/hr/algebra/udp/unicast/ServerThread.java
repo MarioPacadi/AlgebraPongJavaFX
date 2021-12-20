@@ -8,10 +8,8 @@ package hr.algebra.udp.unicast;
 import hr.algebra.controller.MultiplayerController;
 import hr.algebra.model.Paddle;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -30,7 +28,7 @@ public class ServerThread extends Thread {
     public static final int BUFSIZE = 1024 * 4;
     
     private Paddle PADDLE;
-    private boolean pauseGame=false;
+    private static volatile boolean PAUSE=false;
     private volatile boolean running = true;
 
     public ServerThread(Paddle paddle) {
@@ -48,7 +46,7 @@ public class ServerThread extends Thread {
         while (running) {
             try (DatagramSocket serverSocket = new DatagramSocket(PORT)) {
                 //Receive response
-                System.err.println("Server listening on port: " + serverSocket.getLocalPort());
+                //System.err.println("Server listening on port: " + serverSocket.getLocalPort());
                 byte[] buffer = new byte[BUFSIZE];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 serverSocket.receive(packet);
@@ -56,7 +54,7 @@ public class ServerThread extends Thread {
                 //Client info
                 InetAddress clientAddress = packet.getAddress();
                 int clientPort = packet.getPort();
-                System.out.println("Server received message from " + clientAddress + ":" + clientPort);
+                //System.out.println("Server received message from " + clientAddress + ":" + clientPort);
 
                 //Display response
                 try(ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
@@ -101,11 +99,11 @@ public class ServerThread extends Thread {
     }   
 
     public void setPauseGame(boolean pause_game) {
-        this.pauseGame = pause_game;
+        ServerThread.PAUSE = pause_game;
     }
 
     public boolean isPauseGame() {
-        return pauseGame;
+        return PAUSE;
     }
     // </editor-fold>    
 }

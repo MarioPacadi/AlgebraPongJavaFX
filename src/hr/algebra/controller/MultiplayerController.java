@@ -10,13 +10,10 @@ import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
-import hr.algebra.udp.multicast.ServerPadLThread;
-import hr.algebra.udp.multicast.ClientPadLThread;
 import hr.algebra.udp.unicast.ClientThread;
 import hr.algebra.udp.unicast.ServerThread;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.ThreadLocalRandom;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
@@ -42,9 +39,11 @@ public class MultiplayerController implements Initializable {
     
     private GameStat game;
     private Timeline timeline;
+    private Timeline pauseTime;
     private static final int MAX_SCORE=3;
     public static final int TIMELINE_DURATION = 50;
     
+    // <editor-fold defaultstate="collapsed" desc="Network var">
     private ServerThread serverL;
     private ClientThread clientL;
     private ServerThread serverR;
@@ -54,7 +53,8 @@ public class MultiplayerController implements Initializable {
     private final int PORT_L = 12350;
     private final String HOST_R = "localhost";
     private final int PORT_R = 12345;
-
+    // </editor-fold>
+    
     @FXML
     private Pane PlayingField;
     @FXML
@@ -88,8 +88,12 @@ public class MultiplayerController implements Initializable {
                 checkGameBounds();
         }));
         
+        pauseTime = new Timeline(new KeyFrame(Duration.millis(TIMELINE_DURATION), e -> {pauseClickCheck(false);}));
+        
         timeline.setCycleCount(Timeline.INDEFINITE);
+        pauseTime.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+        pauseTime.play();
         SetGameplaySpeed(GameStat.GAME_SPEED);
         SetListeners(); 
     }    
@@ -162,7 +166,7 @@ public class MultiplayerController implements Initializable {
                 pauseClickCheck(true);
                 break;
         }
-        pauseClickCheck(false);
+        //pauseClickCheck(false);
     }
     
     private void enabledLeft() {
@@ -296,9 +300,6 @@ public class MultiplayerController implements Initializable {
     private void SetupDefaultBall() {
           ball.setDx(-1);
           ball.setDy(-1);
-//        ball.setDx(GenRandomDirection());
-//        ball.setDy(GenRandomDirection());
-
     }
 
     private void SetupCustomBall(Ball customBall) {
@@ -350,7 +351,7 @@ public class MultiplayerController implements Initializable {
         //Pause game
         switch (keyEvent.getCode()) {
             case ESCAPE: {
-                pauseGame();
+                serverL.setPauseGame(!serverL.isPauseGame());
             }
             break;
             default: {
@@ -366,13 +367,8 @@ public class MultiplayerController implements Initializable {
         } else {
             PlayingField.setOpacity(1);
             timeline.play();
-        }
-              
-        switch (POSITION) {
-            case 0: serverR.setPauseGame(pauseActive); break;
-            case 1: serverL.setPauseGame(pauseActive); break;
-        }
-
+        }             
+        
         lbPause.setVisible(pauseActive);
     }
     
@@ -389,10 +385,15 @@ public class MultiplayerController implements Initializable {
     }
 
     private void pauseClickCheck(boolean pauseAnyway) {
+        if (pauseAnyway) {
+            pauseGame();
+            return;
+        }
         
-        if (serverL.isPauseGame() || serverR.isPauseGame() || pauseAnyway) {
+        if (serverR.isPauseGame()) {
             pauseGame();
         }
-    } 
+    }
+ 
   
 }
