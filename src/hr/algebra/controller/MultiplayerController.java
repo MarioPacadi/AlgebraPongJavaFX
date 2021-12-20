@@ -10,14 +10,15 @@ import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
-import hr.algebra.udp.multicast.ClientPaddleThread;
-import hr.algebra.udp.multicast.ServerPaddleThread;
+import hr.algebra.udp.multicast.ServerPadLThread;
+import hr.algebra.udp.multicast.ClientPadLThread;
 import hr.algebra.udp.unicast.ClientThread;
 import hr.algebra.udp.unicast.ServerThread;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadLocalRandom;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -33,6 +34,7 @@ import javafx.util.Duration;
  *
  * @author Atlas Comic
  */
+//https://stackoverflow.com/questions/15964832/javafx-1-fxml-file-with-multiple-different-controllers
 public class MultiplayerController implements Initializable {
 
     // <editor-fold defaultstate="collapsed" desc="Variables">
@@ -40,13 +42,18 @@ public class MultiplayerController implements Initializable {
     
     private GameStat game;
     private Timeline timeline;
-    private static final int MAX_SCORE=5;
-    
-    private ServerThread serverR;
-    private ClientThread clientR;
+    private static final int MAX_SCORE=3;
+    public static final int TIMELINE_DURATION = 50;
     
     private ServerThread serverL;
     private ClientThread clientL;
+    private ServerThread serverR;
+    private ClientThread clientR;   
+   
+    private final String HOST_L = "clienthost1";
+    private final int PORT_L = 12350;
+    private final String HOST_R = "localhost";
+    private final int PORT_R = 12345;
 
     @FXML
     private Pane PlayingField;
@@ -63,21 +70,14 @@ public class MultiplayerController implements Initializable {
 
     // </editor-fold>
 
-    //Sloziti ServerProjekt
-    /**
-     * Initializes the controller class.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
        game=new GameStat(ball.getCenterX(),ball.getCenterY());
         
-       serverR=new ServerThread(padL);
-       clientR=new ClientThread(padR);
-       serverL = new ServerThread(padR);
-       clientL = new ClientThread(padL);
+       initNetworkThreads();
        Platform.runLater(()->StartThreads());
        
-        timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> {
+        timeline = new Timeline(new KeyFrame(Duration.millis(TIMELINE_DURATION), e -> {
                 //Input
                 checkInput();
                 //physics updates
@@ -144,27 +144,25 @@ public class MultiplayerController implements Initializable {
     }
     // </editor-fold> 
 
-    //<editor-fold defaultstate="collapsed" desc="Inputs and bot">
+    //<editor-fold defaultstate="collapsed" desc="Inputs and Network">
     private void checkInput() {
         switch (POSITION) {
             case 0:
                 enabledLeft();  
-                //server.setPADDLE(padL);
-                //serverInput();
+                clientL.setPADDLE(padL);
                 networkInput(padR, serverR);
                 break;
             case 1:
                 enabledRight();
                 clientR.setPADDLE(padR);
-                
-                //networkInput(padL, client);
-                //clientInput();                
+                networkInput(padL, serverL);                
                 break;
             default:
                 lbPause.setText("Non-existant \n position!");
-                pauseGame();
+                pauseClickCheck(true);
                 break;
         }
+        pauseClickCheck(false);
     }
     
     private void enabledLeft() {
@@ -174,8 +172,7 @@ public class MultiplayerController implements Initializable {
             padL.moveUpward();
         } else {
             padL.slowDown();
-        }
-        //new ServerPaddleThread(padL,POSITION,"230.0.0.2").start();  
+        } 
     }
 
     private void enabledRight() {
@@ -186,74 +183,69 @@ public class MultiplayerController implements Initializable {
         } else {
             padR.slowDown();
         }
-        //new ServerPaddleThread(padR,POSITION,"230.0.0.1").start();  
     }
     
-    private void clientInput(Paddle padSend, Paddle padChange) {
-        ClientPaddleThread cpt = new ClientPaddleThread("Client " + padSend.getId());
-        cpt.start();
-        if (cpt.getY() != null) {
-            padChange.setY(cpt.getY());
-        }
-    }
-    
-    private void clientInput(Paddle padSend, Paddle padChange, int PORT) {
-        ClientPaddleThread cpt = new ClientPaddleThread("Client " + padSend.getId());
-        cpt.start();
-        if (cpt.getY() != null) {
-            padChange.setY(cpt.getY());
-        }
+    private void initNetworkThreads(){
+        serverR = new ServerThread(HOST_R, PORT_R, padR);
+        clientR = new ClientThread(HOST_R, PORT_R, padR);
+        serverL = new ServerThread(HOST_L, PORT_L, padL);
+        clientL = new ClientThread(HOST_L, PORT_L, padL);
+        
+        serverL.setName("left");
+        serverR.setName("right");
     }
     
     private void StartThreads(){
-        System.out.println(POSITION);
+
         switch (POSITION) {
             case 0:
-                serverR.start();
+                serverR.start();  
+                clientL.start();
                 break;
             case 1:
+                serverL.start();
                 clientR.start();
                 break;
             default:
                 lbPause.setText("Non-existant \n position!");
-                pauseGame();
+                pauseClickCheck(true);
                 break;
         }
     }
     
-    private void serverInput() {
-        padR.setY(serverR.getY());
-    }
-    
-    private void clientInput() {
-        padL.setY(clientR.getY());     
-    }
-    
-    private void networkInput(Paddle changepad,Thread net) {
-        switch (net.getClass().getSimpleName()) {
-            case "ServerThread":
-                changepad.setY(((ServerThread)net).getY());
+    private void StopThreads() {
+
+        switch (POSITION) {
+            case 0:
+                serverR.terminate();
+                clientL.terminate();
                 break;
-            case "ClientThread":
-                changepad.setY(((ClientThread)net).getY());
+            case 1:
+                clientR.terminate();
+                serverL.terminate();
                 break;
             default:
-                System.out.println("Network thread isnt instanceof scope");
+                lbPause.setText("Non-existant \n position!");
+                pauseClickCheck(true);
+                break;
         }
-//        if (net instanceof ServerThread || net instanceof ClientThread) {
-//            pad.setY(net.getY());
-//        }     
+        System.out.println("Threads have been terminated");
     }
-
-    //Ova funkcija se konstantno delete-a 
-    private int GenRandomDirection() {
-        int num;
-        int min = -1, max = 1;
-        do {
-            num = ThreadLocalRandom.current().nextInt(min, max + 1);
-        } while (num == 0);
-        return num;
-    }
+      
+    private void networkInput(Paddle changepad,Thread netThread) {
+        double Y=223;
+        switch (netThread.getClass().getSimpleName()) {
+            case "ServerThread":
+                Y=((ServerThread) netThread).getY();
+                break;
+            case "ClientThread":
+                Y=((ClientThread) netThread).getY();
+                break;
+            default:
+                System.out.println("Network thread isnt instanceof ServerThread or ClientThread");
+        }
+        changepad.setY(Y);  
+    } 
 
     private void SetGameplaySpeed(int i) {
         for (int j = 0; j < i; j++) {
@@ -263,7 +255,7 @@ public class MultiplayerController implements Initializable {
 
     // </editor-fold>   
 
-    //<editor-fold defaultstate="collapsed" desc="Score and Documentation">
+    //<editor-fold defaultstate="collapsed" desc="Score">
     private void ChangeScore() {
         int isHit = ball.getHit();
         if (isHit != 0 && !(isHit > 1) && !(isHit < -1)) {
@@ -275,12 +267,10 @@ public class MultiplayerController implements Initializable {
             else { SetScore(lbRight, 1); }
             
             if (checkScore(lbLeft)) {
-                lbPause.setText("Left \n Won");
-                pauseGame();
+                endGame("Left \n Won",5);
             }
             else if (checkScore(lbRight)) {
-                lbPause.setText("Right \n Won");
-                pauseGame();
+                endGame("Right \n Won", 5);
             }
             ball.setHit(0);
         }
@@ -377,8 +367,32 @@ public class MultiplayerController implements Initializable {
             PlayingField.setOpacity(1);
             timeline.play();
         }
+              
+        switch (POSITION) {
+            case 0: serverR.setPauseGame(pauseActive); break;
+            case 1: serverL.setPauseGame(pauseActive); break;
+        }
+
         lbPause.setVisible(pauseActive);
     }
+    
     // </editor-fold> 
+
+    private void endGame(String text, int time) {
+        lbPause.setText(text);
+        pauseGame();
+        StopThreads();
+        
+        PauseTransition delay = new PauseTransition(Duration.seconds(time));
+        delay.setOnFinished(event -> System.exit(0));
+        delay.play();
+    }
+
+    private void pauseClickCheck(boolean pauseAnyway) {
+        
+        if (serverL.isPauseGame() || serverR.isPauseGame() || pauseAnyway) {
+            pauseGame();
+        }
+    } 
   
 }

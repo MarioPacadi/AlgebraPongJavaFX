@@ -5,6 +5,7 @@
  */
 package hr.algebra.udp.unicast;
 
+import hr.algebra.controller.MultiplayerController;
 import hr.algebra.model.Paddle;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,20 +25,28 @@ import java.util.logging.Logger;
  */
 public class ServerThread extends Thread {
 
-    public static final String HOST = "localhost";
-    public static final int SERVER_PORT = 12345;
+    private String HOST = "clienthost1";
+    private int PORT = 12350;
     public static final int BUFSIZE = 1024 * 4;
     
     private Paddle PADDLE;
+    private boolean pauseGame=false;
+    private volatile boolean running = true;
 
     public ServerThread(Paddle paddle) {
         this.PADDLE = new Paddle(paddle);
     }
     
+    public ServerThread(String host, int port, Paddle paddle) {
+        this.HOST = host;
+        this.PORT = port;
+        this.PADDLE = paddle;
+    }
+    
     @Override
     public void run() {
-        while (true) {
-            try (DatagramSocket serverSocket = new DatagramSocket(SERVER_PORT)) {
+        while (running) {
+            try (DatagramSocket serverSocket = new DatagramSocket(PORT)) {
                 //Receive response
                 System.err.println("Server listening on port: " + serverSocket.getLocalPort());
                 byte[] buffer = new byte[BUFSIZE];
@@ -63,20 +72,8 @@ public class ServerThread extends Thread {
                 } catch (ClassNotFoundException e) {
                     System.err.println("No object could be read from the received UDP datagram.");
                 }
-
-                //Send data
-//                try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                    ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-//                    
-//                    oos.writeObject(PADDLE);
-//                    buffer = baos.toByteArray();
-//                    packet = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
-//                    serverSocket.send(packet);
-//                } catch (IOException e) {
-//                    System.err.println("No object could be writen from the received UDP datagram.");
-//                }
-                
-                Thread.sleep(25);
+              
+                Thread.sleep(MultiplayerController.TIMELINE_DURATION/2);
 
             } catch (SocketException ex) {
                 Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -85,7 +82,12 @@ public class ServerThread extends Thread {
             }
         }        
     }
+    
+    public void terminate() {
+        running = false;
+    }
 
+    //<editor-fold defaultstate="collapsed" desc="Get and Set">
     public double getY() {
         return PADDLE.getY();
     }
@@ -98,4 +100,12 @@ public class ServerThread extends Thread {
         this.PADDLE = PADDLE;
     }   
 
+    public void setPauseGame(boolean pause_game) {
+        this.pauseGame = pause_game;
+    }
+
+    public boolean isPauseGame() {
+        return pauseGame;
+    }
+    // </editor-fold>    
 }
