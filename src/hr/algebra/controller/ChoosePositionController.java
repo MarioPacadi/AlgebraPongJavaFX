@@ -56,27 +56,27 @@ public class ChoosePositionController implements Initializable {
 
     @FXML
     private void leftPlayer(ActionEvent event) {
-        pauseGame();
+        waitPlayer();
         server.start();
         try {
             server.join(2000);
             ifConnectedStart("GAME START LEFT", 0);
         } catch (InterruptedException ex) {
             Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);
-            pauseGame();
+            waitPlayer();
         }        
     }
 
     @FXML
     private void rightPlayer(ActionEvent event) {
-        pauseGame();
+        waitPlayer();
         client.start();
         try {
             client.join(2000);
             ifConnectedStart("GAME START RIGHT", 1);
         } catch (InterruptedException ex) {
             Logger.getLogger(ChoosePositionController.class.getName()).log(Level.SEVERE, null, ex);
-            pauseGame();
+            waitPlayer();
         }
     }
     
@@ -110,7 +110,7 @@ public class ChoosePositionController implements Initializable {
         else System.out.println("Error choosen position out of scope");
     }
     
-    private void pauseGame() {
+    private void waitPlayer() {
         boolean pauseActive = !waitingPane.visibleProperty().get();
         if (pauseActive) {
             positionPane.setOpacity(0.5);

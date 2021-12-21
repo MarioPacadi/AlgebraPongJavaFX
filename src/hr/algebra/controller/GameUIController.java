@@ -6,10 +6,16 @@
 package hr.algebra.controller;
 
 import hr.algebra.PongApplication;
-import static hr.algebra.PongApplication.ICON;
+import hr.algebra.contract.MessengerService;
+import hr.algebra.contract.MessengerServiceImpl;
 import hr.algebra.resources.BallPane;
 import hr.algebra.handler.MovementHandler;
+import hr.algebra.server.ChatServer;
 import java.net.URL;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +25,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -58,7 +63,8 @@ public class GameUIController implements Initializable {
             startNewWindow(POSITION_PATH);
         } catch (Exception ex) {
             System.out.println("New Window couldn't be started!");
-        }       
+        }
+        startChatServer();
     }
     
     @FXML
@@ -96,9 +102,30 @@ public class GameUIController implements Initializable {
         Stage newWindow = new Stage();
         newWindow.setTitle("Client App");
         newWindow.setScene(scene);
+        newWindow.getIcons().add((new PongApplication().getIcon()));
         newWindow.setOnCloseRequest(e -> System.exit(0));
         //window.setResizable(true);
         newWindow.show();
+    }
+    
+    public void startChatServer(){
+        System.out.println("Server started...");
+        MessengerService server = new MessengerServiceImpl();
+        try {
+            MessengerService stub = (MessengerService) UnicastRemoteObject
+                    .exportObject((MessengerService) server, 0);
+
+            Registry registry = LocateRegistry.createRegistry(1099);
+
+            System.out.println("RMI Registry created!");
+
+            registry.rebind("MessengerService", stub);
+
+            System.out.println("Service binded...");
+
+        } catch (RemoteException ex) {
+            Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 }

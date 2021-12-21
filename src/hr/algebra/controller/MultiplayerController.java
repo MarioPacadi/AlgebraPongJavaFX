@@ -12,14 +12,21 @@ import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.udp.unicast.ClientThread;
 import hr.algebra.udp.unicast.ServerThread;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -40,8 +47,9 @@ public class MultiplayerController implements Initializable {
     private GameStat game;
     private Timeline timeline;
     private Timeline pauseTime;
-    private static final int MAX_SCORE=3;
+    private static final int MAX_SCORE=2;
     public static final int TIMELINE_DURATION = 50;
+    private static final String CHAT_PATH = "/hr/algebra/view/ChatRoom.fxml";
     
     // <editor-fold defaultstate="collapsed" desc="Network var">
     private ServerThread serverL;
@@ -49,10 +57,14 @@ public class MultiplayerController implements Initializable {
     private ServerThread serverR;
     private ClientThread clientR;   
    
-    private final String HOST_L = "clienthost1";
-    private final int PORT_L = 12350;
+    private final String HOST_L = "clienthost";
+    private final int PORT_L = 12355;
     private final String HOST_R = "localhost";
     private final int PORT_R = 12345;
+    
+    //incase of windows_update: 
+    // Control Panel\Network and Internet\Network Connections
+    // %WINDIR%\System32\Drivers\Etc\Hosts notepad
     // </editor-fold>
     
     @FXML
@@ -189,12 +201,12 @@ public class MultiplayerController implements Initializable {
         }
     }
     
-    private void initNetworkThreads(){
+    private void initNetworkThreads(){  
         serverR = new ServerThread(HOST_R, PORT_R, padR);
         clientR = new ClientThread(HOST_R, PORT_R, padR);
         serverL = new ServerThread(HOST_L, PORT_L, padL);
         clientL = new ClientThread(HOST_L, PORT_L, padL);
-        
+     
         serverL.setName("left");
         serverR.setName("right");
     }
@@ -203,12 +215,12 @@ public class MultiplayerController implements Initializable {
 
         switch (POSITION) {
             case 0:
-                serverR.start();  
                 clientL.start();
+                serverR.start();  
                 break;
             case 1:
-                serverL.start();
                 clientR.start();
+                serverL.start();
                 break;
             default:
                 lbPause.setText("Non-existant \n position!");
@@ -237,7 +249,7 @@ public class MultiplayerController implements Initializable {
     }
       
     private void networkInput(Paddle changepad,Thread netThread) {
-        double Y=223;
+        double Y=0;
         switch (netThread.getClass().getSimpleName()) {
             case "ServerThread":
                 Y=((ServerThread) netThread).getY();
@@ -249,6 +261,7 @@ public class MultiplayerController implements Initializable {
                 System.out.println("Network thread isnt instanceof ServerThread or ClientThread");
         }
         changepad.setY(Y);  
+        //System.out.println(changepad);
     } 
 
     private void SetGameplaySpeed(int i) {
@@ -297,31 +310,6 @@ public class MultiplayerController implements Initializable {
     // </editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="Setup Components">
-    private void SetupDefaultBall() {
-          ball.setDx(-1);
-          ball.setDy(-1);
-    }
-
-    private void SetupCustomBall(Ball customBall) {
-        ball.setCenterX(customBall.getCenterX());
-        ball.setCenterY(customBall.getCenterY());
-        ball.setDx(customBall.getDx());
-        ball.setDy(customBall.getDy());
-    }
-
-    private void SetupPaddle(Paddle paddle, Paddle custom) {
-        paddle.setX(custom.getX());
-        paddle.setY(custom.getY());
-        paddle.vy = custom.vy;
-    }
-
-    private void SetupGameStats(GameStat gameStat) {
-        System.out.println(gameStat);
-        timeline.setRate(gameStat.getGameSpeedRate());
-        SetScore(lbLeft, Integer.parseInt(gameStat.getLeftScore()));
-        SetScore(lbRight, Integer.parseInt(gameStat.getRightScore()));
-    }
-
     public void setPOSITION(int POSITION) {
         this.POSITION = POSITION;
     }
@@ -351,7 +339,12 @@ public class MultiplayerController implements Initializable {
         //Pause game
         switch (keyEvent.getCode()) {
             case ESCAPE: {
-                serverL.setPauseGame(!serverL.isPauseGame());
+                switch (POSITION) {
+                    case 0: serverL.setPauseGame(!serverL.isPauseGame()); break;
+                    case 1: serverR.setPauseGame(!serverR.isPauseGame()); break;
+                }
+                pauseGame();
+//                System.out.println("ESC Pause is " + serverL.isPauseGame() + POSITION);
             }
             break;
             default: {
@@ -367,8 +360,8 @@ public class MultiplayerController implements Initializable {
         } else {
             PlayingField.setOpacity(1);
             timeline.play();
-        }             
-        
+        }
+              
         lbPause.setVisible(pauseActive);
     }
     
@@ -380,7 +373,7 @@ public class MultiplayerController implements Initializable {
         StopThreads();
         
         PauseTransition delay = new PauseTransition(Duration.seconds(time));
-        delay.setOnFinished(event -> System.exit(0));
+        delay.setOnFinished(event->changeToChatRoom());
         delay.play();
     }
 
@@ -390,10 +383,53 @@ public class MultiplayerController implements Initializable {
             return;
         }
         
-        if (serverR.isPauseGame()) {
+        if (serverL.isPauseGame()) {
             pauseGame();
+           // System.out.println("After PauseGame is " + serverL.isPauseGame() + POSITION);
+            switch (POSITION) {
+                case 0:
+                    serverL.setPauseGame(false);
+                    break;
+                case 1:
+                    serverR.setPauseGame(false);
+                    break;
+            }                   
+            //System.out.println("After SetPause is " + serverL.isPauseGame() + POSITION);
+            System.out.println("------------------------");
         }
+    }   
+    
+    private void changeToChatRoom() {
+        Stage stage = (Stage) PlayingField.getScene().getWindow();
+        try {
+            startChange(stage, CHAT_PATH);
+        } catch (Exception ex) {
+            Logger.getLogger(GameUIController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("Yellow");
     }
+
+    public void startChange(Stage window, String path) throws Exception {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(CHAT_PATH));
+        Parent root = (Parent) fxmlLoader.load();
+        ChatRoomController controller = fxmlLoader.<ChatRoomController>getController();
+
+        Scene scene = new Scene(root);
+
+        switch (POSITION) {
+            case 0:
+                controller.setUsername("Player 1");
+                break;
+            case 1:
+                controller.setUsername("Player 2");
+                break;
+        }       
+        window.setTitle("ChatRoomApp " + (POSITION + 1));
+        window.setScene(scene);
+        window.setOnCloseRequest(e -> System.exit(0));
+        window.show();
+    }
+    
  
   
 }

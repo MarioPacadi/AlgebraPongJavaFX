@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -25,6 +27,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 /**
  * FXML Controller class
@@ -48,17 +51,18 @@ public class ChatRoomController implements Initializable {
 
     private MessengerService server;  
 
+    private Timeline refresher;
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            Registry registry;
-            registry = LocateRegistry.getRegistry();
+            Registry registry = LocateRegistry.getRegistry();
             System.out.println("Registry retrieved!");
             server = (MessengerService) registry.lookup("MessengerService");
             System.out.println("Service retrieved!");
             listMessages.setItems(messages);
-            initMessages();
+            initRefresher();
         } catch (RemoteException | NotBoundException ex) {
             Logger.getLogger(ChatRoomController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -66,24 +70,34 @@ public class ChatRoomController implements Initializable {
     }   
 
     private void initMessages() {
-        new Thread(()->{
-            try {
-                server.getChatHistory().forEach(m->messages.add(m));
-            } catch (RemoteException ex) {
-                Logger.getLogger(ChatRoomController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }).start();
+        try {
+            messages.clear();
+            server.getChatHistory().forEach(m -> messages.add(m));
+        } catch (RemoteException ex) {
+            Logger.getLogger(ChatRoomController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
+    
+    private void initRefresher() {
+        refresher = new Timeline(new KeyFrame(Duration.millis(1000), e -> {
+            initMessages();
+        }));
+        refresher.setCycleCount(Timeline.INDEFINITE);
+        refresher.play();
+    }  
 
     @FXML
     private void clickSend(ActionEvent event) {
         try {
-            System.out.println("Client started!");
-            ChatMessage newMessage = new ChatMessage(Username, txtMsg.getText().trim(), LocalDateTime.now());
-            server.sendMessage(newMessage);
-            System.out.println(newMessage);
-            messages.add(newMessage);
-            refresh();
+            String message=txtMsg.getText().trim();
+            if (!message.isEmpty()) {
+                ChatMessage newMessage = new ChatMessage(Username, message, LocalDateTime.now());
+                server.sendMessage(newMessage);
+                System.out.println(newMessage);
+                messages.add(newMessage);
+                refresh();
+            }
+
         } catch (RemoteException ex) {
             Logger.getLogger(ChatRoomController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -96,5 +110,7 @@ public class ChatRoomController implements Initializable {
     private void refresh() {
         txtMsg.clear();
     }
+
+
     
 }

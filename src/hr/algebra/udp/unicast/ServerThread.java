@@ -19,16 +19,16 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author daniel.bele
+ * @author Atlas Comic
  */
 public class ServerThread extends Thread {
 
-    private String HOST = "clienthost1";
-    private int PORT = 12350;
+    private String HOST;
+    private int PORT;
     public static final int BUFSIZE = 1024 * 4;
     
     private Paddle PADDLE;
-    private static volatile boolean PAUSE=false;
+    private static boolean PAUSE=false;
     private volatile boolean running = true;
 
     public ServerThread(Paddle paddle) {
@@ -46,7 +46,7 @@ public class ServerThread extends Thread {
         while (running) {
             try (DatagramSocket serverSocket = new DatagramSocket(PORT)) {
                 //Receive response
-                //System.err.println("Server listening on port: " + serverSocket.getLocalPort());
+                System.err.println("Server listening on port: " + serverSocket.getLocalPort());
                 byte[] buffer = new byte[BUFSIZE];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 serverSocket.receive(packet);
@@ -54,7 +54,7 @@ public class ServerThread extends Thread {
                 //Client info
                 InetAddress clientAddress = packet.getAddress();
                 int clientPort = packet.getPort();
-                //System.out.println("Server received message from " + clientAddress + ":" + clientPort);
+                System.out.println("Server received message from " + clientAddress + ":" + clientPort);
 
                 //Display response
                 try(ByteArrayInputStream bais = new ByteArrayInputStream(buffer);

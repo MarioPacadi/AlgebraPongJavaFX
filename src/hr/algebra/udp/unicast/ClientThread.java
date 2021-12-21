@@ -18,12 +18,12 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author daniel.bele
+ * @author Atlas Comic
  */
 public class ClientThread extends Thread {
 
-    private String HOST = "clienthost1";
-    private int PORT = 12350;
+    private String HOST;
+    private int PORT;
     
     private Paddle PADDLE;
     private volatile boolean running = true;
@@ -52,7 +52,7 @@ public class ClientThread extends Thread {
                     //Server info
                     InetAddress serverAddress = InetAddress.getByName(HOST);
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, PORT);
-                    //System.out.println("Client sent message from " + serverAddress + ":" + clientSocket.getLocalPort());
+                    System.out.println("Client sent message from " + serverAddress + ":" + clientSocket.getLocalPort() + " to Server with port: "+ packet.getPort());
                     
                     clientSocket.send(packet);
                     
