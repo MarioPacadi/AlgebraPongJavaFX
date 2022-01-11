@@ -6,6 +6,7 @@
 package hr.algebra.controller;
 
 import hr.algebra.handler.MovementHandler;
+import hr.algebra.resources.Configurations;
 import hr.algebra.tcp.TCP_ClientThread;
 import hr.algebra.tcp.TCP_ServerThread;
 import java.net.URL;
@@ -30,9 +31,7 @@ import javafx.stage.Stage;
  * @author Atlas Comic
  */
 public class ChoosePositionController implements Initializable {
-
-    private static final String MULTIPLAYER_PATH="/hr/algebra/view/Multiplayer.fxml";
-    
+  
     @FXML
     private Label lbChoice;
     @FXML
@@ -82,7 +81,7 @@ public class ChoosePositionController implements Initializable {
     
     private void ifConnectedStart(String message, int pos) {
         System.out.println(message);
-        ChangeCurrentWindow(MULTIPLAYER_PATH, pos);
+        ChangeCurrentWindow(Configurations.MULTIPLAYER_PATH, pos);
     }
     
     private void ChangeCurrentWindow(String path, int pos) {

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
 /**
@@ -26,6 +27,12 @@ public class Ball extends Circle implements Externalizable {
     private int dx = 1, dy = 1;
 
     public Ball(){}
+    public Ball(double x,double y,double radius,String color){
+        this.setCenterX(x);
+        this.setCenterY(y);
+        this.setRadius(radius);
+        this.setFill(Paint.valueOf(color));
+    }
 
     public void moveBall(Pane PlayingField) {
         double x=this.getCenterX();

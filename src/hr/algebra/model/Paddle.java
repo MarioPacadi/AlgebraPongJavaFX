@@ -9,6 +9,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 
 
@@ -30,6 +31,14 @@ public class Paddle extends Rectangle implements Externalizable   {
         this.setHeight(paddle.getHeight());
         this.setFill(paddle.getFill());
         this.vy=paddle.vy;
+    }
+    
+    public Paddle(double x, double y, String color, double width, double height) {
+        this.setX(x);
+        this.setY(y);
+        this.setWidth(width);
+        this.setHeight(height);
+        this.setFill(Paint.valueOf(color));
     }
 
     public void updatePosition(){

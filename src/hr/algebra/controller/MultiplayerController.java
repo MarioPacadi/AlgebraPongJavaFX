@@ -12,8 +12,6 @@ import hr.algebra.model.helper.TimelineExtensions;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.udp.unicast.ClientThread;
 import hr.algebra.udp.unicast.ServerThread;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;

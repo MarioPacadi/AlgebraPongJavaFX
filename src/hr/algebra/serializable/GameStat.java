@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class GameStat implements Serializable {
     private static final long serialVersionUID = 3L;
     
-    public static final int GAME_SPEED = 5;
+    public static final int GAME_SPEED = 10;
     private double gameSpeedRate;
     private double start_posX, start_posY;
     private String LeftScore, RightScore;

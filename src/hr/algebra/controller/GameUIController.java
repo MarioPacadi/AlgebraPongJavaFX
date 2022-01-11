@@ -10,6 +10,7 @@ import hr.algebra.contract.MessengerService;
 import hr.algebra.contract.MessengerServiceImpl;
 import hr.algebra.resources.BallPane;
 import hr.algebra.handler.MovementHandler;
+import hr.algebra.resources.Configurations;
 import hr.algebra.server.ChatServer;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -20,6 +21,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -35,9 +37,9 @@ import javafx.stage.Stage;
  */
 public class GameUIController implements Initializable {
     
-    private static final String SINGLEPLAYER_PATH="/hr/algebra/view/Singleplayer.fxml";
-    private static final String MULTIPLAYER_PATH="/hr/algebra/view/Multiplayer.fxml";
-    private static final String POSITION_PATH = "/hr/algebra/view/ChoosePosition.fxml"; 
+//    private static final String SINGLEPLAYER_PATH="/hr/algebra/view/Singleplayer.fxml";
+//    private static final String MULTIPLAYER_PATH="/hr/algebra/view/Multiplayer.fxml";
+//    private static final String POSITION_PATH = "/hr/algebra/view/ChoosePosition.fxml"; 
     
     @FXML
     private AnchorPane mainPane;
@@ -52,19 +54,24 @@ public class GameUIController implements Initializable {
     
     @FXML
     private void btnSinglePlayerClick() {
-        ChangeCurrentWindow(SINGLEPLAYER_PATH);
+        ChangeCurrentWindow(Configurations.SINGLEPLAYER_PATH);
     } 
     
     @FXML
     private void btnMultiPlayerClick() {
         //Choose left or right
-        ChangeCurrentWindow(POSITION_PATH);
+        ChangeCurrentWindow(Configurations.POSITION_PATH);
         try {
-            startNewWindow(POSITION_PATH);
+            startNewWindow(Configurations.POSITION_PATH);
         } catch (Exception ex) {
             System.out.println("New Window couldn't be started!");
         }
         startChatServer();
+    }
+    
+    @FXML
+    private void btnResponsiveClick(ActionEvent event) {
+        ChangeCurrentWindow(Configurations.RESPONSIVE_PATH);
     }
     
     @FXML
