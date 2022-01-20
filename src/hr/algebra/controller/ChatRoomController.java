@@ -78,7 +78,7 @@ public class ChatRoomController implements Initializable {
         }
     }
     
-    private void initRefresher() {
+    private synchronized void initRefresher() {
         refresher = new Timeline(new KeyFrame(Duration.millis(1000), e -> {
             initMessages();
         }));

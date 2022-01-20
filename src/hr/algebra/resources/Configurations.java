@@ -5,13 +5,7 @@
  */
 package hr.algebra.resources;
 
-import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
-import hr.algebra.serializable.GameStat;
-import javafx.animation.Timeline;
-import javafx.application.Platform;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
 
 /**
  *
@@ -41,8 +35,8 @@ public class Configurations {
         padL=new Paddle(0, padCenter, "DARKBLUE", PAD_WIDTH, PAD_HEIGHT);
         padR=new Paddle(WIDTH-PAD_WIDTH,padCenter,"RED",PAD_WIDTH,PAD_HEIGHT);
         
-        isUpdateInProcess = false; 
-        isPowerOn=true;            
+        isUpdateInProcess = false;
+        isPowerOn=true;
     }
     
     public static synchronized void PhysicsUpdate(){

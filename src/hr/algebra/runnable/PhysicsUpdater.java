@@ -51,5 +51,4 @@ public class PhysicsUpdater implements Runnable {
 
         notifyAll();
     }
-    
 }

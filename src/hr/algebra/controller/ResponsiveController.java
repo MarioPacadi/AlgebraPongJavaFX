@@ -5,7 +5,6 @@
  */
 package hr.algebra.controller;
 
-import hr.algebra.controller.SingleplayerController;
 import hr.algebra.handler.MovementHandler;
 import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
@@ -15,15 +14,9 @@ import hr.algebra.resources.Configurations;
 import hr.algebra.runnable.PhysicsUpdater;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.utilities.AlertUtils;
-import hr.algebra.utilities.ReflectionUtils;
 import hr.algebra.utilities.SerializationUtils;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,11 +25,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -344,7 +335,7 @@ public class ResponsiveController implements Initializable {
                         stage.setOnCloseRequest(e -> {
                             //SaveFiles();
                             Configurations.isPowerOn=false;
-                            Platform.exit();
+                            System.exit(0);
                         });
                         stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> onKeyPressed(event));
                     }
