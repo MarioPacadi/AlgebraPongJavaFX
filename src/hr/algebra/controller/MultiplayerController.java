@@ -9,9 +9,12 @@ import hr.algebra.handler.MovementHandler;
 import hr.algebra.model.Ball;
 import hr.algebra.model.Paddle;
 import hr.algebra.model.helper.TimelineExtensions;
+import hr.algebra.resources.Configurations;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.udp.unicast.ClientThread;
 import hr.algebra.udp.unicast.ServerThread;
+import hr.algebra.utilities.AlertUtils;
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -30,6 +33,19 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * FXML Controller class
@@ -41,13 +57,15 @@ public class MultiplayerController implements Initializable {
 
     // <editor-fold defaultstate="collapsed" desc="Variables">
     public int POSITION=-1;
+    private Document xmlDocument;
+    private Element rootElement;
     
     private GameStat game;
     private Timeline timeline;
     private Timeline pauseTime;
     private static final int MAX_SCORE=2;
     public static final int TIMELINE_DURATION = 50;
-    private static final String CHAT_PATH = "/hr/algebra/view/ChatRoom.fxml";
+    
     
     // <editor-fold defaultstate="collapsed" desc="Network var">
     private ServerThread serverL;
@@ -83,7 +101,8 @@ public class MultiplayerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
        game=new GameStat(ball.getCenterX(),ball.getCenterY());
-        
+       
+       initXmlDoc();
        initNetworkThreads();
        Platform.runLater(()->StartThreads());
        
@@ -118,6 +137,7 @@ public class MultiplayerController implements Initializable {
         checkPaddle(padR);
         //If ball hit
         ChangeScore();
+        XMLRecordInput();
     }
 
     private void checkPaddle(Paddle pad) {
@@ -365,11 +385,13 @@ public class MultiplayerController implements Initializable {
     
     // </editor-fold> 
 
+    //<editor-fold defaultstate="collapsed" desc="Change to chatRoom">
+    
     private void endGame(String text, int time) {
         lbPause.setText(text);
         pauseGame();
         StopThreads();
-        
+        createXmlDoc();
         PauseTransition delay = new PauseTransition(Duration.seconds(time));
         delay.setOnFinished(event->changeToChatRoom());
         delay.play();
@@ -400,7 +422,7 @@ public class MultiplayerController implements Initializable {
     private void changeToChatRoom() {
         Stage stage = (Stage) PlayingField.getScene().getWindow();
         try {
-            startChange(stage, CHAT_PATH);
+            startChange(stage, Configurations.CHAT_PATH);
         } catch (Exception ex) {
             Logger.getLogger(GameUIController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -408,7 +430,7 @@ public class MultiplayerController implements Initializable {
     }
 
     public void startChange(Stage window, String path) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(CHAT_PATH));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(path));
         Parent root = (Parent) fxmlLoader.load();
         ChatRoomController controller = fxmlLoader.<ChatRoomController>getController();
 
@@ -421,13 +443,63 @@ public class MultiplayerController implements Initializable {
             case 1:
                 controller.setUsername("Player 2");
                 break;
-        }       
-        window.setTitle("ChatRoomApp " + (POSITION + 1));
+        }
+        if (POSITION!=-1) window.setTitle("ChatRoomApp " + (POSITION + 1));
+        else window.setTitle("ChatRoomApp " + "Guest");
+        
         window.setScene(scene);
         window.setOnCloseRequest(e -> System.exit(0));
         window.show();
     }
+
+    // </editor-fold> 
+  
+    //<editor-fold defaultstate="collapsed" desc="XML Recorder">
     
+    private void initXmlDoc(){
+        DocumentBuilderFactory documentBuilderFactory
+                = DocumentBuilderFactory.newInstance();
+        try {
+            xmlDocument = documentBuilderFactory.newDocumentBuilder().newDocument();
+            rootElement = xmlDocument.createElement("Pong");
+            xmlDocument.appendChild(rootElement);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(MultiplayerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void XMLRecordInput() {         
+        recordPaddleXML(padL);
+        recordPaddleXML(padR);
+    }
+    
+    private void recordPaddleXML(Paddle pad){
+        String value=String.valueOf(pad.getY());
+
+        Node vyNode = xmlDocument.createTextNode(value);
+        Element strengthAmount = xmlDocument.createElement(pad.getId());
+        strengthAmount.appendChild(vyNode);
+        rootElement.appendChild(strengthAmount);
+        System.out.println(vyNode.toString() + " - "+ value);
+    }
+    
+    private void createXmlDoc(){
+        try {            
+            Transformer transformer
+                    = TransformerFactory.newInstance().newTransformer();
+            
+            Source xmlSource = new DOMSource(xmlDocument);
+            Result xmlResult = new StreamResult(new File("gameRecord.xml"));
+
+            transformer.transform(xmlSource, xmlResult);
+
+            System.out.println("Paddle record created successfuly!");
+            //AlertUtils.infoBox("Paddle record created successfuly!", "XML created", "Information dialog");
+        } catch (TransformerException ex) {
+            Logger.getLogger(MultiplayerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    // </editor-fold> 
  
   
 }

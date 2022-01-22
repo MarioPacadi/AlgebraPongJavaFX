@@ -22,11 +22,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -111,6 +115,31 @@ public class ChatRoomController implements Initializable {
         txtMsg.clear();
     }
 
+    @FXML
+    private void itsRewindTime(ActionEvent event) {
+        
+    }
 
+    private void changeToChatRoom() {
+        Stage stage = (Stage) scrollPane.getScene().getWindow();
+        try {
+            startChange(stage, REPLAY_PATH);
+        } catch (Exception ex) {
+            Logger.getLogger(GameUIController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("Yellow");
+    }
+
+    public void startChange(Stage window, String path) throws Exception {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(path));
+        Parent root = (Parent) fxmlLoader.load();
+        ReplayController controller = fxmlLoader.<ReplayController>getController();
+
+        Scene scene = new Scene(root);
+
+        window.setScene(scene);
+        window.setOnCloseRequest(e -> System.exit(0));
+        window.show();
+    }
     
 }

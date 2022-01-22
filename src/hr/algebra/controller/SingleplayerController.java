@@ -303,7 +303,7 @@ public class SingleplayerController implements Initializable,Serializable {
     
     //<editor-fold defaultstate="collapsed" desc="Serialization">
     private void DetectSaveDataFile() {     
-        if (FileName.CheckFileExistance() && AlertUtils.infoBox("Info", "Would you like to load data?", "Save file detected")) {
+        if (FileName.CheckFileExistance() && AlertUtils.confirmationBox("Info", "Would you like to load data?", "Save file detected")) {
             LoadFile(ball,FileName.BALL.toString());
             LoadFile(padL,FileName.LEFT_RECTANGLE.toString());
             LoadFile(padR,FileName.RIGHT_RECTANGLE.toString());
@@ -339,7 +339,7 @@ public class SingleplayerController implements Initializable,Serializable {
     private void SaveFiles(){
         try {
             timeline.stop();
-            if (AlertUtils.infoBox("Info", "Would you like to save your game?", "Save game data")) {
+            if (AlertUtils.confirmationBox("Info", "Would you like to save your game?", "Save game data")) {
                 SerializationUtils.write(ball, FileName.BALL.toString());
                 SerializationUtils.write(padL, FileName.LEFT_RECTANGLE.toString());
                 SerializationUtils.write(padR, FileName.RIGHT_RECTANGLE.toString());

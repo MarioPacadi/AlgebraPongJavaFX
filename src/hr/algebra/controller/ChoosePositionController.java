@@ -52,7 +52,7 @@ public class ChoosePositionController implements Initializable {
         server=new TCP_ServerThread();
         client=new TCP_ClientThread();
     }    
-
+    //%WINDIR%\System32\Drivers\Etc\Hosts
     @FXML
     private void leftPlayer(ActionEvent event) {
         waitPlayer();

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import hr.algebra.model.Ball?>
+<?import hr.algebra.model.Ball?>
+<?import hr.algebra.model.Paddle?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" fx:id="mainPane" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.291" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.controller.ReplayController">
+   <children>
+      <Pane fx:id="PlayingField" prefHeight="574.0" style="-fx-background-color: BLACK;" prefWidth="800.0">
+         <children>
+             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="TRANSPARENT" height="574.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="5.0" width="800.0" />
+            <Line endX="400.0" endY="574.0" stroke="WHITE" startX="400.0" strokeWidth="5.0" />
+            <Paddle fx:id="padR" arcHeight="5.0" arcWidth="5.0" fill="RED" height="120.0" strokeType="INSIDE" width="25.0" x="775.0" y="227.0"/>
+            <Paddle fx:id="padL" arcHeight="5.0" arcWidth="5.0" fill="DARKBLUE" height="120.0" strokeType="INSIDE" width="25.0" x="0.0" y="227.0"/>
+            <Ball fx:id="ball" fill="GREEN" centerX="403.0" centerY="283.0" radius="20.0" strokeType="INSIDE" />
+         </children>
+      </Pane>
+      <Pane prefHeight="574.0" prefWidth="800.0">
+         <children>
+            <Label fx:id="lbRight" layoutX="585.0" layoutY="78.0" text="0" textFill="WHITE">
+               <font>
+                  <Font name="Copperplate Gothic Bold" size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbLeft" layoutX="164.0" layoutY="78.0" text="0" textFill="WHITE">
+               <font>
+                  <Font name="Copperplate Gothic Bold" size="18.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>

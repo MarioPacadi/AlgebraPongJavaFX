@@ -15,7 +15,7 @@ import javafx.scene.control.ButtonType;
  */
 public class AlertUtils {
     //Alerts
-    public static boolean infoBox(String infoMessage, String headerText, String title) {
+    public static boolean confirmationBox(String infoMessage, String headerText, String title) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setContentText(infoMessage);
         alert.setTitle(title);
@@ -26,5 +26,14 @@ public class AlertUtils {
         return result.get() == ButtonType.OK; 
         // ... user chose OK button
         // ... user chose CANCEL or closed the dialog
+    }
+    
+    public static void infoBox(String infoMessage, String headerText, String title){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information Dialog");
+        alert.setHeaderText("XML created");
+        alert.setContentText("Person record create successfuly!");
+        alert.show();
+        //alert.showAndWait();
     }
 }

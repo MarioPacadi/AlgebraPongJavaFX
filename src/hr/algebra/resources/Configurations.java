@@ -22,6 +22,8 @@ public class Configurations {
     public static final String MULTIPLAYER_PATH = "/hr/algebra/view/Multiplayer.fxml";
     public static final String POSITION_PATH = "/hr/algebra/view/ChoosePosition.fxml";  
     public static final String RESPONSIVE_PATH= "/hr/algebra/view/Responsive.fxml";
+    public static final String CHAT_PATH = "/hr/algebra/view/ChatRoom.fxml";
+    public static final String REPLAY_PATH = "/hr/algebra/view/Replay.fxml";
     
     public static boolean isUpdateInProcess;
     public static boolean isPowerOn;

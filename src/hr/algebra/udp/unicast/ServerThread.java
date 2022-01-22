@@ -46,7 +46,7 @@ public class ServerThread extends Thread {
         while (running) {
             try (DatagramSocket serverSocket = new DatagramSocket(PORT)) {
                 //Receive response
-                System.err.println("Server listening on port: " + serverSocket.getLocalPort());
+                //System.err.println("Server listening on port: " + serverSocket.getLocalPort());
                 byte[] buffer = new byte[BUFSIZE];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 serverSocket.receive(packet);
@@ -54,7 +54,7 @@ public class ServerThread extends Thread {
                 //Client info
                 InetAddress clientAddress = packet.getAddress();
                 int clientPort = packet.getPort();
-                System.out.println("Server received message from " + clientAddress + ":" + clientPort);
+                //System.out.println("Server received message from " + clientAddress + ":" + clientPort);
 
                 //Display response
                 try(ByteArrayInputStream bais = new ByteArrayInputStream(buffer);

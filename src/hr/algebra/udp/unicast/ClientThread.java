@@ -52,7 +52,7 @@ public class ClientThread extends Thread {
                     //Server info
                     InetAddress serverAddress = InetAddress.getByName(HOST);
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, PORT);
-                    System.out.println("Client sent message from " + serverAddress + ":" + clientSocket.getLocalPort() + " to Server with port: "+ packet.getPort());
+                    //System.out.println("Client sent message from " + serverAddress + ":" + clientSocket.getLocalPort() + " to Server with port: "+ packet.getPort());
                     
                     clientSocket.send(packet);
                     

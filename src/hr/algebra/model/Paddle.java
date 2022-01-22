@@ -75,6 +75,14 @@ public class Paddle extends Rectangle implements Externalizable   {
         }
     }
 
+    public double getVy() {
+        return vy;
+    }
+
+    public void setVy(double vy) {
+        this.vy = vy;
+    }
+
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeDouble(this.getX());
