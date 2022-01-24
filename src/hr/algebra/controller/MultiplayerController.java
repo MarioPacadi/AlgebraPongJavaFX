@@ -13,7 +13,6 @@ import hr.algebra.resources.Configurations;
 import hr.algebra.serializable.GameStat;
 import hr.algebra.udp.unicast.ClientThread;
 import hr.algebra.udp.unicast.ServerThread;
-import hr.algebra.utilities.AlertUtils;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -38,7 +37,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -468,19 +466,55 @@ public class MultiplayerController implements Initializable {
         }
     }
     
-    private void XMLRecordInput() {         
+    private void XMLRecordInput() {  
+        recordBallXML(ball);
         recordPaddleXML(padL);
         recordPaddleXML(padR);
+        recordScoreXML();
     }
     
     private void recordPaddleXML(Paddle pad){
-        String value=String.valueOf(pad.getY());
+        Element padElement=createElementWithValue(pad.getId(), pad.getY());      
+        rootElement.appendChild(padElement);
+    }
+    
+    private void recordBallXML(Ball ball) {
+        Element ballElement = xmlDocument.createElement(ball.getId());
+        
+        Element xElement = createElementWithValue("x", ball.getCenterX());
+        Element yElement = createElementWithValue("y", ball.getCenterY());
+        Element radiusElement = createElementWithValue("radius", ball.getRadius());       
+        
+        ballElement=appendChildren(ballElement, xElement,yElement,radiusElement);
+        
+        rootElement.appendChild(ballElement);
+    }
+    
+    private void recordScoreXML(){
+        Element scoreElement = xmlDocument.createElement("score");
 
-        Node vyNode = xmlDocument.createTextNode(value);
-        Element strengthAmount = xmlDocument.createElement(pad.getId());
-        strengthAmount.appendChild(vyNode);
-        rootElement.appendChild(strengthAmount);
-        System.out.println(vyNode.toString() + " - "+ value);
+        Element leftElement = createElementWithValue(lbLeft.getId(), lbLeft.getText());
+        Element rightElement = createElementWithValue(lbRight.getId(), lbRight.getText());
+
+        scoreElement = appendChildren(scoreElement, leftElement,rightElement);
+
+        rootElement.appendChild(scoreElement);
+    }
+    
+    private Element createElementWithValue(String name, Object value) {
+        String text = String.valueOf(value);       
+        Element element = xmlDocument.createElement(name);
+        Node node = xmlDocument.createTextNode(text);
+        element.appendChild(node);
+        
+        return element;
+    }
+    
+    private Element appendChildren(Element parent,Element... children){
+        for (Element element : children) {
+            parent.appendChild(element);
+        }
+        return parent;
     }
     
     private void createXmlDoc(){
@@ -489,12 +523,15 @@ public class MultiplayerController implements Initializable {
                     = TransformerFactory.newInstance().newTransformer();
             
             Source xmlSource = new DOMSource(xmlDocument);
-            Result xmlResult = new StreamResult(new File("gameRecord.xml"));
+            File dir = new File(Configurations.XML_PADDLE);
+            if (!dir.getParentFile().exists()) {
+                dir.getParentFile().mkdirs(); //Create dir, if not exist
+            }
+            Result xmlResult = new StreamResult(dir);
 
             transformer.transform(xmlSource, xmlResult);
 
-            System.out.println("Paddle record created successfuly!");
-            //AlertUtils.infoBox("Paddle record created successfuly!", "XML created", "Information dialog");
+            System.out.println("XML record created successfuly!");
         } catch (TransformerException ex) {
             Logger.getLogger(MultiplayerController.class.getName()).log(Level.SEVERE, null, ex);
         }

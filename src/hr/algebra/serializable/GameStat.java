@@ -21,6 +21,11 @@ public class GameStat implements Serializable {
 
     public GameStat() {
     }
+
+    public GameStat(String LeftScore, String RightScore) {
+        this.LeftScore = LeftScore;
+        this.RightScore = RightScore;
+    }   
     
     public GameStat(double start_posX, double start_posY) {
         this.start_posX = start_posX;

@@ -16,6 +16,7 @@ public class Configurations {
     public static final int WIDTH = 800, HEIGHT = 574;
     public static final int PAD_WIDTH=25,PAD_HEIGHT=120;
     public static final double RADIUS=20;
+    
     public static final String ICON_PATH = "/hr/algebra/resources/Pong.png";
     public static final String START_SCENE_PATH = "/hr/algebra/view/GameUI.fxml";
     public static final String SINGLEPLAYER_PATH = "/hr/algebra/view/Singleplayer.fxml";
@@ -24,6 +25,8 @@ public class Configurations {
     public static final String RESPONSIVE_PATH= "/hr/algebra/view/Responsive.fxml";
     public static final String CHAT_PATH = "/hr/algebra/view/ChatRoom.fxml";
     public static final String REPLAY_PATH = "/hr/algebra/view/Replay.fxml";
+    
+    public static final String XML_PADDLE="SaveFiles/xmlFiles/gameRecord.xml";
     
     public static boolean isUpdateInProcess;
     public static boolean isPowerOn;

@@ -7,6 +7,7 @@ package hr.algebra.controller;
 
 import hr.algebra.contract.ChatMessage;
 import hr.algebra.contract.MessengerService;
+import hr.algebra.resources.Configurations;
 import java.net.URL;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -117,13 +118,20 @@ public class ChatRoomController implements Initializable {
 
     @FXML
     private void itsRewindTime(ActionEvent event) {
-        
+        refresher.stop();       
+        try {
+            ChatMessage newMessage = new ChatMessage(Username, "[" + Username + " is watching replay]", LocalDateTime.now());
+            server.sendMessage(newMessage);
+        } catch (RemoteException ex) {
+            Logger.getLogger(ChatRoomController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        changeToChatRoom();
     }
 
     private void changeToChatRoom() {
         Stage stage = (Stage) scrollPane.getScene().getWindow();
         try {
-            startChange(stage, REPLAY_PATH);
+            startChange(stage, Configurations.REPLAY_PATH);
         } catch (Exception ex) {
             Logger.getLogger(GameUIController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -135,8 +143,8 @@ public class ChatRoomController implements Initializable {
         Parent root = (Parent) fxmlLoader.load();
         ReplayController controller = fxmlLoader.<ReplayController>getController();
 
+        controller.setReturnUsername(Username);
         Scene scene = new Scene(root);
-
         window.setScene(scene);
         window.setOnCloseRequest(e -> System.exit(0));
         window.show();
