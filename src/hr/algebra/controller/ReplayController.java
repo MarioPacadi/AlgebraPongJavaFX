@@ -77,6 +77,8 @@ public class ReplayController implements Initializable {
     private List<Ball> balls;
     private List<GameStat> gamestats;
     // </editor-fold> 
+    @FXML
+    private Label lbPause;
 
     /**
      * Initializes the controller class.
@@ -105,6 +107,7 @@ public class ReplayController implements Initializable {
         padLs = new ArrayList<>();
         padRs = new ArrayList<>();
         balls = new ArrayList<>();
+        gamestats=new ArrayList<>();
     }
     
     private boolean detectXMLData() {
@@ -234,7 +237,9 @@ public class ReplayController implements Initializable {
     private void checkIfReplayDone() {
         if (areListsEmpty()) {
             timeline.stop();
-            PauseTransition delay = new PauseTransition(Duration.seconds(2));
+            lbPause.setVisible(true);
+            PlayingField.setOpacity(0.5);
+            PauseTransition delay = new PauseTransition(Duration.seconds(3));
             delay.setOnFinished(event -> changeToChatRoom());
             delay.play();
         }

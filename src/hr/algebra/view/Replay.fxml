@@ -23,6 +23,11 @@
       </Pane>
       <Pane prefHeight="574.0" prefWidth="800.0">
          <children>
+            <Label fx:id="lbPause" layoutX="209.0" layoutY="241.0" text="REPLAY COMPLETE!" textAlignment="CENTER" textFill="WHITE" visible="false">
+               <font>
+                  <Font name="Copperplate Gothic Bold" size="48.0" />
+               </font>
+            </Label>
             <Label fx:id="lbRight" layoutX="585.0" layoutY="78.0" text="0" textFill="WHITE">
                <font>
                   <Font name="Copperplate Gothic Bold" size="18.0" />
