@@ -34,6 +34,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -61,7 +62,7 @@ public class MultiplayerController implements Initializable {
     private GameStat game;
     private Timeline timeline;
     private Timeline pauseTime;
-    private static final int MAX_SCORE=2;
+    private static final int MAX_SCORE=3;
     public static final int TIMELINE_DURATION = 50;
     
     
@@ -529,6 +530,9 @@ public class MultiplayerController implements Initializable {
             }
             Result xmlResult = new StreamResult(dir);
 
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.transform(xmlSource, xmlResult);
 
             System.out.println("XML record created successfuly!");
