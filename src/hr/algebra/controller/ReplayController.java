@@ -17,8 +17,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,10 +74,11 @@ public class ReplayController implements Initializable {
     private Timeline timeline;
     private String ReturnUsername;
     
-    private List<Double> padLs;
-    private List<Double> padRs;
-    private List<Ball> balls;
-    private List<GameStat> gamestats;
+    private Queue<Double> padLs;
+    private Queue<Double> padRs;
+    private Queue<Ball> balls;
+    private Queue<GameStat> gamestats;
+
     // </editor-fold> 
     @FXML
     private Label lbPause;
@@ -100,14 +103,14 @@ public class ReplayController implements Initializable {
 
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-        SetGameplaySpeed(GameStat.GAME_SPEED);
+        SetGameplaySpeed(14);
     } 
     
     private void initLists() {
-        padLs = new ArrayList<>();
-        padRs = new ArrayList<>();
-        balls = new ArrayList<>();
-        gamestats=new ArrayList<>();
+        padLs = new LinkedList<>();
+        padRs = new LinkedList<>();
+        balls= new LinkedList<>();
+        gamestats = new LinkedList<>();
     }
     
     private boolean detectXMLData() {
@@ -148,8 +151,8 @@ public class ReplayController implements Initializable {
         gamestats = fillListOfGameStats(xmlDocument);
     }
     
-    private List<Ball> fillListOfBalls(Document xmlDocument, Ball ball) {
-        List<Ball> listBalls = new ArrayList<>();
+    private Queue<Ball> fillListOfBalls(Document xmlDocument, Ball ball) {
+        Queue<Ball> listBalls = new LinkedList<>();
         NodeList ballNodes = xmlDocument.getElementsByTagName(ball.getId());
         for (int i = 0; i < ballNodes.getLength(); i++) {
             Node ballNode = ballNodes.item(i);
@@ -166,8 +169,8 @@ public class ReplayController implements Initializable {
         return listBalls;
     } 
     
-    private List<Double> fillListOfPaddles(Document xmlDocument,Paddle pad) {
-        List<Double> pads=new ArrayList<>();
+    private Queue<Double> fillListOfPaddles(Document xmlDocument,Paddle pad) {
+        Queue<Double> pads=new LinkedList<>();
         NodeList padNodes = xmlDocument.getElementsByTagName(pad.getId());
         for (int i = 0; i < padNodes.getLength(); i++) {
             Node padNode = padNodes.item(i);
@@ -180,8 +183,8 @@ public class ReplayController implements Initializable {
         return pads;
     }
     
-    private List<GameStat> fillListOfGameStats(Document xmlDocument) {
-        List<GameStat> listStats = new ArrayList<>();
+    private Queue<GameStat> fillListOfGameStats(Document xmlDocument) {
+        Queue<GameStat> listStats = new LinkedList<>();
         NodeList scoreNodes = xmlDocument.getElementsByTagName("score");
         for (int i = 0; i < scoreNodes.getLength(); i++) {
             Node scoreNode = scoreNodes.item(i);
@@ -210,27 +213,24 @@ public class ReplayController implements Initializable {
   
     //<editor-fold defaultstate="collapsed" desc="UpdateData">
     
-    private void updatePaddlePosition(Paddle pad, List<Double> padList) {
-        if (!padList.isEmpty() && padList.size() > 0) {
-            Double temp=padList.get(0);
+    private void updatePaddlePosition(Paddle pad, Queue<Double> padList) {
+        Double temp=padList.poll();
+        if (temp!=null) {
             SetupPaddle(pad, temp);
-            padList.remove(temp);
         }
     }
     
-    private void updateBallPosition(List<Ball> listOfBalls) {
-        if (!listOfBalls.isEmpty() && listOfBalls.size() > 0) {
-            Ball temp = listOfBalls.get(0);
+    private void updateBallPosition(Queue<Ball> listOfBalls) {
+        Ball temp = listOfBalls.poll();
+        if (temp!=null) {
             SetupCustomBall(temp);
-            listOfBalls.remove(temp);
         }
     }
     
-    private void updateScore(List<GameStat> gameStats) {
-        if (!gameStats.isEmpty() && gameStats.size() > 0) {
-            GameStat temp = gameStats.get(0);
+    private void updateScore(Queue<GameStat> gameStats) {
+        GameStat temp = gameStats.poll();
+        if (temp!=null) {
             SetupGameStats(temp);
-            gameStats.remove(temp);
         }
     }
     

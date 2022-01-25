@@ -24,25 +24,25 @@ public void writeExternal(java.io.ObjectOutput arg0) throws java.io.IOException
 public void moveBall(javafx.scene.layout.Pane arg0)
 
 
-public int getDx()
-
-
-public void setHit(int arg0)
-
-
-public int getHit()
-
-
-public int getDy()
-
-
-public void setDx(int arg0)
+public double getBALL_ACCELERATION()
 
 
 public void setDy(int arg0)
 
 
-public double getBALL_ACCELERATION()
+public void setDx(int arg0)
+
+
+public int getDx()
+
+
+public int getDy()
+
+
+public int getHit()
+
+
+public void setHit(int arg0)
 
 
 public hr.algebra.model.Ball()
@@ -70,7 +70,10 @@ public void readExternal(java.io.ObjectInput arg0) throws java.io.IOException ja
 public void writeExternal(java.io.ObjectOutput arg0) throws java.io.IOException
 
 
-public void updatePosition()
+public void slowDown()
+
+
+public void moveDownward()
 
 
 public void moveUpward()
@@ -82,10 +85,7 @@ public void setVy(double arg0)
 public double getVy()
 
 
-public void moveDownward()
-
-
-public void slowDown()
+public void updatePosition()
 
 
 public hr.algebra.model.Paddle(double arg0, double arg1, java.lang.String arg2, double arg3, double arg4)
